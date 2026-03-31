@@ -1,30 +1,32 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import "./entrance.css";
 
-const fullTitle = "Welcome to The Forest";
-
 export default function Home() {
-  const [status, setStatus] = useState("Uploading signal...");
-  const [ready, setReady] = useState(false);
-  const [typedTitle, setTypedTitle] = useState("");
+  const fullText = "WELCOME TO THE FOREST";
 
+  const [typedText, setTypedText] = useState("");
+  const [status, setStatus] = useState("Uploading Signal");
+  const [ready, setReady] = useState(false);
+
+  // typing effect
   useEffect(() => {
     let index = 0;
 
     const typing = setInterval(() => {
-      index += 1;
-      setTypedTitle(fullTitle.slice(0, index));
+      setTypedText(fullText.slice(0, index + 1));
+      index++;
 
-      if (index >= fullTitle.length) {
+      if (index === fullText.length) {
         clearInterval(typing);
       }
-    }, 70);
+    }, 40);
 
     return () => clearInterval(typing);
   }, []);
 
+  // status change
   useEffect(() => {
     const timer = setTimeout(() => {
       setStatus("Network Accessed");
@@ -34,46 +36,45 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  const titleForLayers = useMemo(
-    () => (typedTitle.length > 0 ? typedTitle : " "),
-    [typedTitle]
-  );
-
   return (
-    <main className="forest-screen min-h-screen flex items-center justify-center px-6 text-white relative overflow-hidden">
+    <main className="forest-screen min-h-screen flex items-center justify-center px-4 text-white">
+      
       <div className="forest-beam" />
 
-<div className="relative z-10 w-full text-center entrance-stack px-4">        <img
+
+      <div className="relative z-10 w-full text-center entrance-stack">
+
+
+        <img
           src="/Logo.png"
           alt="Musemallow Logo"
-          className="logo-image mx-auto w-[300px] sm:w-[420px] md:w-[700px] lg:w-[980px] xl:w-[1180px] 2xl:w-[1320px] h-auto select-none"
+          className="logo-image mx-auto w-[240px] sm:w-[320px] md:w-[460px] lg:w-[560px] h-auto select-none"
           draggable="false"
         />
 
-        <h1
-          className="glitch-text mt-6 text-[14px] sm:text-[18px] md:text-[28px] lg:text-[36px] xl:text-[42px] uppercase tracking-[0.35em] text-blue-200"
-          data-text={titleForLayers}
-        >
-          {typedTitle}
-          <span className="typing-cursor" aria-hidden="true">
-            |
-          </span>
+
+        <h1 className="forest-title mt-4 text-[20px] sm:text-[24px] md:text-[34px] lg:text-[48px] xl:text-[58px] 2xl:text-[64px] text-blue-100">
+          {typedText}
+          <span className="typing-cursor">|</span>
         </h1>
 
-        <p className="status-pulse mt-4 text-[10px] sm:text-[12px] md:text-[16px] lg:text-[18px] uppercase tracking-[0.28em] text-blue-300/80">
+
+        <p className="forest-status mt-3 text-[12px] sm:text-[14px] md:text-[18px] lg:text-[20px] uppercase text-blue-300/80">
           {status}
         </p>
 
+
         <button
           disabled={!ready}
-          className={`mt-8 rounded-full px-8 py-3 md:px-12 md:py-4 text-sm md:text-base lg:text-lg font-semibold transition-all duration-300 ${
+          className={`mt-6 rounded-full px-10 py-3 md:px-14 md:py-4 lg:px-16 lg:py-5 text-sm md:text-base lg:text-lg font-semibold transition-all duration-300 ${
             ready
-              ? "border border-blue-400/70 bg-blue-500/10 text-blue-100 shadow-[0_0_20px_rgba(37,99,235,0.45)] hover:bg-blue-500/20 hover:shadow-[0_0_30px_rgba(59,130,246,0.65)]"
-              : "border border-blue-400/20 bg-blue-500/5 text-blue-200/40 cursor-not-allowed"
+              ? "bg-blue-600 hover:bg-blue-500 shadow-[0_0_25px_rgba(37,99,235,0.6)]"
+              : "bg-blue-900/30 text-blue-400/40 cursor-not-allowed"
           }`}
         >
-          Enter the Forest
+          Enter The Forest
         </button>
+
       </div>
     </main>
   );
