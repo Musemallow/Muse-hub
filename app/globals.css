@@ -1,39 +1,29 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* =========================
-   BASE APP RESET / THEME
-   ========================= */
+:root {
+  --background: #000000;
+  --foreground: #ffffff;
+}
 
 html,
 body {
   margin: 0;
   padding: 0;
-  background: #000000;
-  color: #ffffff;
+  min-height: 100%;
+  background: var(--background);
+  color: var(--foreground);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, sans-serif;
-}
-
-/* Prevent weird mobile bounce / scroll issues */
-body {
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Make images behave nicely */
-img {
-  max-width: 100%;
-  display: block;
-}
-
-/* Smooth rendering */
 * {
   box-sizing: border-box;
 }
 
-/* Optional: nicer text rendering */
-body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+img {
+  display: block;
+  max-width: 100%;
 }
