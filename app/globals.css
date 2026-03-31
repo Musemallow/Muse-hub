@@ -1,5 +1,30 @@
+@import "tailwindcss";
+
+:root {
+  --background: #000000;
+  --foreground: #ffffff;
+}
+
+html,
+body {
+  background: var(--background);
+  color: var(--foreground);
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 .glitch {
   position: relative;
+  display: inline-block;
   animation: flicker 2s infinite;
 }
 
@@ -7,40 +32,22 @@
 .glitch::after {
   content: "Welcome to The Forest";
   position: absolute;
-  left: 0;
-  width: 100%;
-  opacity: 0.6;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.45;
 }
 
 .glitch::before {
   color: #3b82f6;
-  animation: glitchTop 2s infinite;
+  transform: translate(-1px, -1px);
 }
 
 .glitch::after {
   color: #60a5fa;
-  animation: glitchBottom 2s infinite;
-}
-
-@keyframes glitchTop {
-  0% { transform: translate(0); }
-  20% { transform: translate(-2px, -2px); }
-  40% { transform: translate(2px, 2px); }
-  60% { transform: translate(-1px, 1px); }
-  80% { transform: translate(1px, -1px); }
-  100% { transform: translate(0); }
-}
-
-@keyframes glitchBottom {
-  0% { transform: translate(0); }
-  20% { transform: translate(2px, 1px); }
-  40% { transform: translate(-2px, -1px); }
-  60% { transform: translate(1px, -2px); }
-  80% { transform: translate(-1px, 2px); }
-  100% { transform: translate(0); }
+  transform: translate(1px, 1px);
 }
 
 @keyframes flicker {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.85; }
+  50% { opacity: 0.92; }
 }
