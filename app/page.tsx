@@ -63,7 +63,7 @@ export default function Home() {
 
 <button
   disabled={!ready}
-  className={`mt-8 mx-auto w-[45%] max-w-[600px] min-w-[200px] h-[48px] md:h-[60px] lg:h-[72px] rounded-full text-sm md:text-base lg:text-lg font-semibold transition-all duration-300 ${
+  className={`mt-8 mx-auto w-[45%] max-w-[600px] min-w-[200px] h-[48px] md:h-[60px] lg:h-[72px] rounded-full text-base md:text-xl lg:text-2xl font-semibold transition-all duration-300 ${
     ready
       ? "border border-blue-400/70 bg-blue-500/10 text-blue-100 shadow-[0_0_20px_rgba(37,99,235,0.45)] hover:bg-blue-500/20 hover:shadow-[0_0_30px_rgba(59,130,246,0.65)]"
       : "border border-blue-400/20 bg-blue-500/5 text-blue-200/40 cursor-not-allowed"
