@@ -52,7 +52,7 @@ export default function Home() {
         />
 
         <h1
-          className="glitch-text mt-6 text-[14px] sm:text-[18px] md:text-[28px] lg:text-[36px] xl:text-[42px] uppercase tracking-[0.35em] text-blue-200"
+          className="glitch-text mt-6 text-[14px] sm:text-[18px] md:text-[36px] lg:text-[52px] xl:text-[58px] 2xl:text-[64px] uppercase tracking-[0.35em] text-blue-200"
           data-text={titleForLayers}
         >
           {typedTitle}
@@ -61,7 +61,7 @@ export default function Home() {
           </span>
         </h1>
 
-        <p className="status-pulse mt-4 text-[10px] sm:text-[12px] md:text-[16px] lg:text-[18px] uppercase tracking-[0.28em] text-blue-300/80">
+        <p className="status-pulse mt-4 text-[10px] sm:text-[12px] md:text-[22px] lg:text-[28px] xl:text-[32px] 2xl:text-[36px] uppercase tracking-[0.28em] text-blue-300/80">
           {status}
         </p>
 
