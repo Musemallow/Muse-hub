@@ -51,54 +51,93 @@ body {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.92; }
 }
-"use client";
+.forest-screen {
+  background:
+    radial-gradient(circle at 50% 35%, rgba(59, 130, 246, 0.12), transparent 28%),
+    linear-gradient(to bottom, #000000, #02040a 40%, #000000);
+}
 
-import { useEffect, useState } from "react";
+.logo-image {
+  animation: logoFloat 4s ease-in-out infinite;
+  filter: none;
+}
 
-export default function Home() {
-  const [status, setStatus] = useState("Uploading signal...");
-  const [ready, setReady] = useState(false);
+.glitch-text {
+  position: relative;
+  display: inline-block;
+  animation: glitchFlicker 2.6s infinite;
+  text-shadow:
+    -1px 0 rgba(96, 165, 250, 0.55),
+    1px 0 rgba(37, 99, 235, 0.55);
+}
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setStatus("Network Accessed");
-      setReady(true);
-    }, 2200);
+.glitch-text::before,
+.glitch-text::after {
+  content: "WELCOME TO THE FOREST";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.45;
+}
 
-    return () => clearTimeout(timer);
-  }, []);
+.glitch-text::before {
+  color: #93c5fd;
+  transform: translate(-2px, 0);
+  clip-path: inset(0 0 52% 0);
+  animation: glitchShiftTop 2.2s infinite;
+}
 
-  return (
-    <main className="forest-screen min-h-screen flex items-center justify-center px-6 text-white">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,rgba(37,99,235,0.18),transparent_58%)]" />
+.glitch-text::after {
+  color: #2563eb;
+  transform: translate(2px, 0);
+  clip-path: inset(48% 0 0 0);
+  animation: glitchShiftBottom 1.9s infinite;
+}
 
-      <div className="w-full max-w-4xl text-center">
-        <img
-          src="/logo.png"
-          alt="Musemallow Logo"
-          className="logo-image mx-auto w-[240px] sm:w-[320px] md:w-[460px] lg:w-[560px] h-auto select-none"
-          draggable="false"
-        />
+.status-pulse {
+  animation: statusPulse 1.8s ease-in-out infinite;
+}
 
-        <h1 className="glitch-text mt-6 text-[13px] sm:text-base md:text-xl uppercase tracking-[0.45em] text-blue-200">
-          Welcome to The Forest
-        </h1>
+@keyframes glitchFlicker {
+  0%, 100% { opacity: 1; }
+  8% { opacity: 0.82; }
+  10% { opacity: 1; }
+  28% { opacity: 0.88; }
+  30% { opacity: 1; }
+  72% { opacity: 0.9; }
+  74% { opacity: 1; }
+}
 
-        <p className="status-pulse mt-4 text-[10px] sm:text-xs md:text-sm uppercase tracking-[0.28em] text-blue-300/80">
-          {status}
-        </p>
+@keyframes glitchShiftTop {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-2px, -1px); }
+  21% { transform: translate(2px, 1px); }
+  45% { transform: translate(-1px, 0); }
+  46% { transform: translate(1px, -1px); }
+  70% { transform: translate(0, 0); }
+}
 
-        <button
-          disabled={!ready}
-          className={`mt-8 rounded-full px-8 py-3 text-sm md:text-base font-semibold transition-all duration-300 ${
-            ready
-              ? "border border-blue-400/70 bg-blue-500/10 text-blue-100 shadow-[0_0_20px_rgba(37,99,235,0.45)] hover:bg-blue-500/20 hover:shadow-[0_0_30px_rgba(59,130,246,0.65)]"
-              : "border border-blue-400/20 bg-blue-500/5 text-blue-200/40 cursor-not-allowed"
-          }`}
-        >
-          Enter the Forest
-        </button>
-      </div>
-    </main>
-  );
+@keyframes glitchShiftBottom {
+  0%, 100% { transform: translate(0, 0); }
+  16% { transform: translate(2px, 1px); }
+  17% { transform: translate(-2px, 0); }
+  52% { transform: translate(1px, -1px); }
+  53% { transform: translate(-1px, 1px); }
+  78% { transform: translate(0, 0); }
+}
+
+@keyframes statusPulse {
+  0%, 100% {
+    opacity: 0.75;
+    text-shadow: 0 0 0 rgba(59, 130, 246, 0);
+  }
+  50% {
+    opacity: 1;
+    text-shadow: 0 0 12px rgba(96, 165, 250, 0.45);
+  }
+}
+
+@keyframes logoFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
 }
