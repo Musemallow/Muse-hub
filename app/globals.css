@@ -1,143 +1,39 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #000000;
-  --foreground: #ffffff;
-}
+/* =========================
+   BASE APP RESET / THEME
+   ========================= */
 
 html,
 body {
-  background: var(--background);
-  color: var(--foreground);
   margin: 0;
   padding: 0;
-  min-height: 100%;
+  background: #000000;
+  color: #ffffff;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, sans-serif;
 }
 
+/* Prevent weird mobile bounce / scroll issues */
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
 }
 
+/* Make images behave nicely */
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Smooth rendering */
 * {
   box-sizing: border-box;
 }
 
-.glitch {
-  position: relative;
-  display: inline-block;
-  animation: flicker 2s infinite;
-}
-
-.glitch::before,
-.glitch::after {
-  content: "Welcome to The Forest";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.45;
-}
-
-.glitch::before {
-  color: #3b82f6;
-  transform: translate(-1px, -1px);
-}
-
-.glitch::after {
-  color: #60a5fa;
-  transform: translate(1px, 1px);
-}
-
-@keyframes flicker {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.92; }
-}
-.forest-screen {
-  background:
-    radial-gradient(circle at 50% 35%, rgba(59, 130, 246, 0.12), transparent 28%),
-    linear-gradient(to bottom, #000000, #02040a 40%, #000000);
-}
-
-.logo-image {
-  animation: logoFloat 4s ease-in-out infinite;
-  filter: none;
-}
-
-.glitch-text {
-  position: relative;
-  display: inline-block;
-  animation: glitchFlicker 2.6s infinite;
-  text-shadow:
-    -1px 0 rgba(96, 165, 250, 0.55),
-    1px 0 rgba(37, 99, 235, 0.55);
-}
-
-.glitch-text::before,
-.glitch-text::after {
-  content: "WELCOME TO THE FOREST";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.45;
-}
-
-.glitch-text::before {
-  color: #93c5fd;
-  transform: translate(-2px, 0);
-  clip-path: inset(0 0 52% 0);
-  animation: glitchShiftTop 2.2s infinite;
-}
-
-.glitch-text::after {
-  color: #2563eb;
-  transform: translate(2px, 0);
-  clip-path: inset(48% 0 0 0);
-  animation: glitchShiftBottom 1.9s infinite;
-}
-
-.status-pulse {
-  animation: statusPulse 1.8s ease-in-out infinite;
-}
-
-@keyframes glitchFlicker {
-  0%, 100% { opacity: 1; }
-  8% { opacity: 0.82; }
-  10% { opacity: 1; }
-  28% { opacity: 0.88; }
-  30% { opacity: 1; }
-  72% { opacity: 0.9; }
-  74% { opacity: 1; }
-}
-
-@keyframes glitchShiftTop {
-  0%, 100% { transform: translate(0, 0); }
-  20% { transform: translate(-2px, -1px); }
-  21% { transform: translate(2px, 1px); }
-  45% { transform: translate(-1px, 0); }
-  46% { transform: translate(1px, -1px); }
-  70% { transform: translate(0, 0); }
-}
-
-@keyframes glitchShiftBottom {
-  0%, 100% { transform: translate(0, 0); }
-  16% { transform: translate(2px, 1px); }
-  17% { transform: translate(-2px, 0); }
-  52% { transform: translate(1px, -1px); }
-  53% { transform: translate(-1px, 1px); }
-  78% { transform: translate(0, 0); }
-}
-
-@keyframes statusPulse {
-  0%, 100% {
-    opacity: 0.75;
-    text-shadow: 0 0 0 rgba(59, 130, 246, 0);
-  }
-  50% {
-    opacity: 1;
-    text-shadow: 0 0 12px rgba(96, 165, 250, 0.45);
-  }
-}
-
-@keyframes logoFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+/* Optional: nicer text rendering */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
