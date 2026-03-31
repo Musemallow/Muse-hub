@@ -7,8 +7,8 @@ export default function Home() {
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(0deg,transparent,rgba(0,255,255,0.05),transparent)]" />
 
       <img
-  src="/logo.png"
-  alt="Musemallow Logo"
+  src="/Logo.png"
+  alt="MUSE"
   className="w-64 md:w-80 mx-auto drop-shadow-[0_0_20px_#00ffff]"
 />
 
