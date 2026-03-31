@@ -24,8 +24,7 @@ export default function Home() {
         <img
           src="/Logo.png"
           alt="Musemallow Logo"
-          className="logo-image mx-auto w-[300px] sm:w-[420px] md:w-[560px] lg:w-[700px] xl:w-[780px] h-auto select-none"
-          draggable="false"
+className="logo-image mx-auto w-[300px] sm:w-[420px] md:w-[600px] lg:w-[900px] xl:w-[1200px] 2xl:w-[1400px] h-auto select-none"          draggable="false"
         />
 
         <h1 className="glitch-text mt-6 text-[14px] sm:text-[18px] md:text-[24px] lg:text-[30px] uppercase tracking-[0.45em] text-blue-200">
