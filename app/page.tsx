@@ -10,44 +10,37 @@ export default function Home() {
     const timer = setTimeout(() => {
       setStatus("Network Accessed");
       setReady(true);
-    }, 2500);
+    }, 2200);
 
     return () => clearTimeout(timer);
   }, []);
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-black text-white relative overflow-hidden">
+    <main className="forest-screen min-h-screen flex items-center justify-center px-6 text-white">
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,rgba(37,99,235,0.18),transparent_58%)]" />
 
-      {/* Background glow */}
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.15),transparent_60%)]" />
-
-      <div className="text-center space-y-6 px-6">
-
-        {/* LOGO */}
+      <div className="w-full max-w-4xl text-center">
         <img
           src="/Logo.png"
           alt="Musemallow Logo"
-          className="mx-auto w-[260px] drop-shadow-[0_0_20px_#3b82f6]"
+          className="logo-image mx-auto w-[240px] sm:w-[320px] md:w-[460px] lg:w-[560px] h-auto select-none"
+          draggable="false"
         />
 
-        {/* GLITCH TITLE */}
-        <h1 className="text-2xl tracking-[0.4em] uppercase text-blue-300 glitch">
+        <h1 className="glitch-text mt-6 text-[13px] sm:text-base md:text-xl uppercase tracking-[0.45em] text-blue-200">
           Welcome to The Forest
         </h1>
 
-        {/* STATUS TEXT */}
-        <p className="text-sm text-blue-200/70 tracking-widest">
+        <p className="status-pulse mt-4 text-[10px] sm:text-xs md:text-sm uppercase tracking-[0.28em] text-blue-300/80">
           {status}
         </p>
 
-        {/* BUTTON */}
         <button
           disabled={!ready}
-          className={`mt-4 w-full max-w-xs mx-auto rounded-xl border border-blue-500/80 py-3 text-blue-200 transition
-          ${
+          className={`mt-8 rounded-full px-8 py-3 text-sm md:text-base font-semibold transition-all duration-300 ${
             ready
-              ? "bg-blue-500/10 hover:bg-blue-500/20 shadow-[0_0_25px_#3b82f6]"
-              : "opacity-40 cursor-not-allowed"
+              ? "border border-blue-400/70 bg-blue-500/10 text-blue-100 shadow-[0_0_20px_rgba(37,99,235,0.45)] hover:bg-blue-500/20 hover:shadow-[0_0_30px_rgba(59,130,246,0.65)]"
+              : "border border-blue-400/20 bg-blue-500/5 text-blue-200/40 cursor-not-allowed"
           }`}
         >
           Enter the Forest
