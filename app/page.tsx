@@ -22,7 +22,7 @@ export default function Home() {
 
       <div className="relative z-10 w-full max-w-5xl text-center">
         <img
-          src="/logo.png"
+          src="/Logo.png"
           alt="Musemallow Logo"
           className="logo-image mx-auto w-[300px] sm:w-[420px] md:w-[560px] lg:w-[700px] xl:w-[780px] h-auto select-none"
           draggable="false"
