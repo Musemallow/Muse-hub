@@ -6,9 +6,11 @@ export default function Home() {
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,#00ffff33,transparent_60%)]" />
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(0deg,transparent,rgba(0,255,255,0.05),transparent)]" />
 
-      <h1 className="text-5xl font-bold tracking-wide text-white drop-shadow-[0_0_10px_#00ffff]">
-        Musemallow
-      </h1>
+      <img
+  src="/logo.png"
+  alt="Musemallow Logo"
+  className="w-64 md:w-80 mx-auto drop-shadow-[0_0_20px_#00ffff]"
+/>
 
       <p className="mt-2 text-cyan-400 tracking-[0.3em] uppercase text-sm">
         Signal Hub
