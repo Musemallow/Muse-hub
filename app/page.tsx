@@ -51,16 +51,12 @@ export default function Home() {
           draggable="false"
         />
 
-        <h1
-          className="glitch-text mt-6 text-[14px] sm:text-[18px] md:text-[36px] lg:text-[52px] xl:text-[58px] 2xl:text-[64px] uppercase tracking-[0.35em] text-blue-200"
-          data-text={titleForLayers}
-        >
-          {typedTitle}
-          <span className="typing-cursor" aria-hidden="true">
-            |
-          </span>
-        </h1>
-
+<h1 className="forest-title mt-6 whitespace-nowrap text-[12px] sm:text-[16px] md:text-[24px] lg:text-[36px] xl:text-[42px] 2xl:text-[48px] uppercase tracking-[0.28em] text-blue-200">
+  {typedTitle}
+  <span className="typing-cursor" aria-hidden="true">
+    |
+  </span>
+</h1>
         <p className="status-pulse mt-4 text-[10px] sm:text-[12px] md:text-[22px] lg:text-[28px] xl:text-[32px] 2xl:text-[36px] uppercase tracking-[0.28em] text-blue-300/80">
           {status}
         </p>
