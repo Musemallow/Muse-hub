@@ -1,55 +1,58 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
 export default function Home() {
+  const [status, setStatus] = useState("Uploading signal...");
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setStatus("Network Accessed");
+      setReady(true);
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <main className="min-h-screen bg-black text-white relative overflow-hidden flex flex-col items-center justify-center px-4">
+    <main className="min-h-screen flex items-center justify-center bg-black text-white relative overflow-hidden">
 
+      {/* Background glow */}
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.15),transparent_60%)]" />
 
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,#00ffff33,transparent_60%)]" />
-      <div className="absolute inset-0 -z-10 bg-[linear-gradient(0deg,transparent,rgba(0,255,255,0.05),transparent)]" />
+      <div className="text-center space-y-6 px-6">
 
-      <img
-  src="/Logo.png"
-  alt="Musemallow Logo"
-  className="w-64 md:w-80 mx-auto"
-/>
+        {/* LOGO */}
+        <img
+          src="/Logo.png"
+          alt="Musemallow Logo"
+          className="mx-auto w-[260px] drop-shadow-[0_0_20px_#3b82f6]"
+        />
 
-      <p className="mt-2 text-cyan-400 tracking-[0.3em] uppercase text-sm">
-        Signal Hub
-      </p>
+        {/* GLITCH TITLE */}
+        <h1 className="text-2xl tracking-[0.4em] uppercase text-blue-300 glitch">
+          Welcome to The Forest
+        </h1>
 
-
-      <div className="mt-10 w-full max-w-md rounded-2xl border border-cyan-400/40 bg-black/70 backdrop-blur-md p-6 shadow-[0_0_40px_#00ffff33]">
-
-        <h2 className="text-xl font-semibold text-cyan-300">
-          Welcome, Wanderer
-        </h2>
-
-        <p className="mt-2 text-sm text-gray-400">
-          You’ve entered the Musemallow network.
+        {/* STATUS TEXT */}
+        <p className="text-sm text-blue-200/70 tracking-widest">
+          {status}
         </p>
 
-
-        <div className="mt-6 flex flex-col gap-4">
-
-          <button className="w-full rounded-xl border border-cyan-400/60 bg-cyan-500/10 py-3 text-cyan-300 shadow-[0_0_20px_#00ffff44] hover:bg-cyan-500/20 hover:shadow-[0_0_30px_#00ffffaa] transition">
-            Enter Signal Feed
-          </button>
-
-          <button className="w-full rounded-xl border border-blue-500/60 bg-blue-500/10 py-3 text-blue-300 shadow-[0_0_20px_#0066ff44] hover:bg-blue-500/20 hover:shadow-[0_0_30px_#0066ffaa] transition">
-            Audio Logs
-          </button>
-
-          <button className="w-full rounded-xl border border-white/20 bg-white/5 py-3 text-gray-300 hover:bg-white/10 transition">
-            Profile
-          </button>
-
-        </div>
-
+        {/* BUTTON */}
+        <button
+          disabled={!ready}
+          className={`mt-4 w-full max-w-xs mx-auto rounded-xl border border-blue-500/80 py-3 text-blue-200 transition
+          ${
+            ready
+              ? "bg-blue-500/10 hover:bg-blue-500/20 shadow-[0_0_25px_#3b82f6]"
+              : "opacity-40 cursor-not-allowed"
+          }`}
+        >
+          Enter the Forest
+        </button>
       </div>
-
-      <p className="mt-10 text-xs text-cyan-600 tracking-widest">
-        musemallow.app
-      </p>
-
     </main>
   );
 }
