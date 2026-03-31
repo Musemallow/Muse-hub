@@ -43,8 +43,7 @@ export default function Home() {
     <main className="forest-screen min-h-screen flex items-center justify-center px-6 text-white relative overflow-hidden">
       <div className="forest-beam" />
 
-      <div className="relative z-10 w-full max-w-6xl text-center">
-        <img
+<div className="relative z-10 w-full text-center entrance-stack px-4">        <img
           src="/Logo.png"
           alt="Musemallow Logo"
           className="logo-image mx-auto w-[300px] sm:w-[420px] md:w-[700px] lg:w-[980px] xl:w-[1180px] 2xl:w-[1320px] h-auto select-none"
