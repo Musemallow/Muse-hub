@@ -27,31 +27,31 @@ img {
   display: block;
   max-width: 100%;
 }
-
 * {
   box-sizing: border-box;
+}
+
+html,
+body {
   margin: 0;
   padding: 0;
+  background: #000;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
 }
 
 body {
-  background: #000;
-  font-family: Arial, sans-serif;
+  zoom: 0.7;
 }
 
-
-.app-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: 100vh;
-  padding: 20px;
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
-
-.app-container {
-  width: 100%;
-  max-width: 420px; /* phone width */
-  min-height: 100vh;
-  background: #000;
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
