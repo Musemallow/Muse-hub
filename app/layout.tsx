@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "MuseHub",
-  description: "Created by Musemallow",
+  description: "Welcome to The Forest",
 };
 
 export default function RootLayout({
