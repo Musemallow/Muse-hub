@@ -67,16 +67,16 @@ export default function Home() {
           {status}
         </p>
 
-        <button
-          disabled={!ready}
-          className={`mt-10 mx-auto block w-[55%] max-w-[800px] min-w-[260px] h-[64px] md:h-[80px] lg:h-[110px] rounded-full text-base md:text-xl lg:text-3xl font-semibold transition-all duration-300 ${
-            ready
-              ? "border border-blue-400/70 bg-blue-500/10 text-blue-100 shadow-[0_0_25px_rgba(37,99,235,0.55)] hover:bg-blue-500/20 hover:shadow-[0_0_40px_rgba(59,130,246,0.75)]"
-              : "border border-blue-400/20 bg-blue-500/5 text-blue-200/40 cursor-not-allowed"
-          }`}
-        >
-          Enter the Forest
-        </button>
+<button
+  disabled={!ready}
+  className={`mt-10 mx-auto block w-[55%] max-w-[800px] min-w-[260px] h-[64px] md:h-[80px] lg:h-[110px] rounded-full text-xl md:text-3xl lg:text-5xl font-semibold transition-all duration-300 ${
+    ready
+      ? "border border-blue-400/70 bg-blue-500/10 text-blue-100 shadow-[0_0_25px_rgba(37,99,235,0.55)] hover:bg-blue-500/20 hover:shadow-[0_0_40px_rgba(59,130,246,0.75)]"
+      : "border border-blue-400/20 bg-blue-500/5 text-blue-200/40 cursor-not-allowed"
+  }`}
+>
+  Enter the Forest
+</button>
       </div>
     </main>
   );
