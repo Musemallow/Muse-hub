@@ -8,7 +8,7 @@ const fullTitle = "Welcome to The Forest";
 
 export default function Home() {
   const router = useRouter();
-  
+
   const [status, setStatus] = useState("Uploading signal...");
   const [ready, setReady] = useState(false);
   const [typedTitle, setTypedTitle] = useState("");
@@ -70,16 +70,24 @@ export default function Home() {
           {status}
         </p>
 
-        <button
-          disabled={!ready}
-          className={`mt-6 mx-auto block w-full max-w-[260px] h-[42px] rounded-full text-[13px] md:text-[14px] font-semibold transition-all duration-300 ${
-            ready
-              ? "border border-blue-400/70 bg-blue-500/10 text-blue-100 shadow-[0_0_20px_rgba(37,99,235,0.45)] hover:bg-blue-500/20 hover:shadow-[0_0_28px_rgba(59,130,246,0.65)]"
-              : "border border-blue-400/20 bg-blue-500/5 text-blue-200/40 cursor-not-allowed"
-          }`}
-        >
-          Enter the Forest
-        </button>
+<button
+  disabled={!ready}
+  onClick={() => {
+    if (!ready) return;
+
+    setStatus("Entering...");
+    setTimeout(() => {
+      router.push("/feed");
+    }, 400);
+  }}
+  className={`mt-6 mx-auto block w-full max-w-[260px] h-[42px] rounded-full text-[13px] md:text-[14px] font-semibold transition-all duration-300 ${
+    ready
+      ? "border border-blue-400/70 bg-blue-500/10 text-blue-100 shadow-[0_0_20px_rgba(37,99,235,0.45)] hover:bg-blue-500/20 hover:shadow-[0_0_28px_rgba(59,130,246,0.65)]"
+      : "border border-blue-400/20 bg-blue-500/5 text-blue-200/40 cursor-not-allowed"
+  }`}
+>
+  Enter the Forest
+</button>
       </div>
     </main>
   );
