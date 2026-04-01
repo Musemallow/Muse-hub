@@ -27,3 +27,31 @@ img {
   display: block;
   max-width: 100%;
 }
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #000;
+  font-family: Arial, sans-serif;
+}
+
+
+.app-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+
+.app-container {
+  width: 100%;
+  max-width: 420px; /* phone width */
+  min-height: 100vh;
+  background: #000;
+}
