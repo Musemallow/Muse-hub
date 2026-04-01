@@ -27,9 +27,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable}`}
     >
-      <body>
-        <div className="site-scale">{children}</div>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

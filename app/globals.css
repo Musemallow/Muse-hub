@@ -6,22 +6,13 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: #000;
-  color: #fff;
-  font-family: Arial, sans-serif;
-  overflow-x: hidden;
+  min-height: 100%;
 }
 
 body {
-  min-height: 100vh;
-}
-
-/* Shrink the whole app to one-third size */
-.site-scale {
-  transform: scale(0.33);
-  transform-origin: top left;
-  width: 303.03%;
-  min-height: 303.03vh;
+  background: #000;
+  color: #fff;
+  font-family: Arial, sans-serif;
 }
 
 a {
@@ -30,7 +21,7 @@ a {
 }
 
 img {
+  display: block;
   max-width: 100%;
   height: auto;
-  display: block;
 }
