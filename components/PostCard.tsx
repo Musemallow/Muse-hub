@@ -8,15 +8,22 @@ export default function PostCard({ post }: Props) {
   return (
     <div
       style={{
-        background: "#111",
-        borderRadius: 12,
-        padding: 10,
-        marginBottom: 10,
+        background: "#0b0b0f",
+        border: "1px solid rgba(80, 140, 255, 0.14)",
+        borderRadius: 18,
+        padding: 16,
+        marginBottom: 16,
         color: "#fff",
-        border: "1px solid #1f1f1f",
+        boxShadow: "0 0 24px rgba(0, 80, 255, 0.08)",
       }}
     >
-      <div style={{ marginBottom: 8, fontSize: 13 }}>
+      <div
+        style={{
+          marginBottom: 10,
+          fontSize: 14,
+          opacity: 0.9,
+        }}
+      >
         <strong>{post.authorName}</strong> • {post.createdAt}
       </div>
 
@@ -24,9 +31,9 @@ export default function PostCard({ post }: Props) {
         <p
           style={{
             margin: 0,
-            marginBottom: 8,
-            lineHeight: 1.4,
-            fontSize: 13,
+            marginBottom: 12,
+            lineHeight: 1.5,
+            fontSize: 15,
           }}
         >
           {post.caption}
@@ -34,7 +41,7 @@ export default function PostCard({ post }: Props) {
       )}
 
       {post.images.length > 0 && (
-        <div style={{ marginTop: 8 }}>
+        <div style={{ marginTop: 10 }}>
           {post.images.map((img) => (
             <img
               key={img.id}
@@ -42,9 +49,8 @@ export default function PostCard({ post }: Props) {
               alt="Post image"
               style={{
                 width: "100%",
-                borderRadius: 8,
-                marginBottom: 6,
-                display: "block",
+                borderRadius: 12,
+                marginBottom: 8,
               }}
             />
           ))}
@@ -52,16 +58,15 @@ export default function PostCard({ post }: Props) {
       )}
 
       {post.videos.length > 0 && (
-        <div style={{ marginTop: 8 }}>
+        <div style={{ marginTop: 10 }}>
           {post.videos.map((vid) => (
             <div
               key={vid.id}
               style={{
-                padding: 8,
-                background: "#222",
-                borderRadius: 8,
-                marginBottom: 6,
-                fontSize: 13,
+                padding: 12,
+                background: "rgba(255,255,255,0.04)",
+                borderRadius: 12,
+                marginBottom: 8,
               }}
             >
               🎬 {vid.title || "Video"}
@@ -71,16 +76,15 @@ export default function PostCard({ post }: Props) {
       )}
 
       {post.audios.length > 0 && (
-        <div style={{ marginTop: 8 }}>
+        <div style={{ marginTop: 10 }}>
           {post.audios.map((aud) => (
             <div
               key={aud.id}
               style={{
-                padding: 8,
-                background: "#222",
-                borderRadius: 8,
-                marginBottom: 6,
-                fontSize: 13,
+                padding: 12,
+                background: "rgba(255,255,255,0.04)",
+                borderRadius: 12,
+                marginBottom: 8,
               }}
             >
               🎧 {aud.title || "Audio"} ({aud.duration || "--:--"})
@@ -89,7 +93,13 @@ export default function PostCard({ post }: Props) {
         </div>
       )}
 
-      <div style={{ marginTop: 8, opacity: 0.7, fontSize: 12 }}>
+      <div
+        style={{
+          marginTop: 12,
+          fontSize: 14,
+          opacity: 0.7,
+        }}
+      >
         ♥ {post.likeCount} • 💬 {post.commentCount}
       </div>
     </div>
