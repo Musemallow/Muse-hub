@@ -1,11 +1,14 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import "./entrance.css";
 
 const fullTitle = "Welcome to The Forest";
 
 export default function Home() {
+  const router = useRouter();
+  
   const [status, setStatus] = useState("Uploading signal...");
   const [ready, setReady] = useState(false);
   const [typedTitle, setTypedTitle] = useState("");
