@@ -27,9 +27,9 @@ const MAX_IMAGE_COUNT = 4;
 const MAX_VIDEO_COUNT = 1;
 const MAX_AUDIO_COUNT = 1;
 
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 MB
-const MAX_VIDEO_SIZE = 200 * 1024 * 1024; // 200 MB
-const MAX_AUDIO_SIZE = 50 * 1024 * 1024; // 50 MB
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+const MAX_VIDEO_SIZE = 200 * 1024 * 1024;
+const MAX_AUDIO_SIZE = 50 * 1024 * 1024;
 
 export default function CreatePage() {
   const [caption, setCaption] = useState("");
@@ -333,14 +333,7 @@ export default function CreatePage() {
           }}
         >
           <div>
-            <h1
-              style={{
-                margin: 0,
-                fontSize: "28px",
-              }}
-            >
-              Create Post
-            </h1>
+            <h1 style={{ margin: 0, fontSize: "28px" }}>Create Post</h1>
             <p
               style={{
                 margin: "6px 0 0 0",
@@ -419,21 +412,11 @@ export default function CreatePage() {
               marginBottom: "16px",
             }}
           >
-            <div
-              style={{
-                fontSize: "13px",
-                opacity: 0.65,
-              }}
-            >
+            <div style={{ fontSize: "13px", opacity: 0.65 }}>
               {caption.length}/2000
             </div>
 
-            <div
-              style={{
-                fontSize: "13px",
-                opacity: 0.65,
-              }}
-            >
+            <div style={{ fontSize: "13px", opacity: 0.65 }}>
               {images.length}/{MAX_IMAGE_COUNT} images • {videos.length}/
               {MAX_VIDEO_COUNT} video • {audios.length}/{MAX_AUDIO_COUNT} audio
             </div>
@@ -502,12 +485,7 @@ export default function CreatePage() {
             }}
           >
             <div>
-              <h2
-                style={{
-                  margin: "0 0 10px 0",
-                  fontSize: "16px",
-                }}
-              >
+              <h2 style={{ margin: "0 0 10px 0", fontSize: "16px" }}>
                 Image Preview
               </h2>
 
@@ -558,12 +536,7 @@ export default function CreatePage() {
             </div>
 
             <div>
-              <h2
-                style={{
-                  margin: "0 0 10px 0",
-                  fontSize: "16px",
-                }}
-              >
+              <h2 style={{ margin: "0 0 10px 0", fontSize: "16px" }}>
                 Video Preview
               </h2>
 
@@ -614,12 +587,7 @@ export default function CreatePage() {
             </div>
 
             <div>
-              <h2
-                style={{
-                  margin: "0 0 10px 0",
-                  fontSize: "16px",
-                }}
-              >
+              <h2 style={{ margin: "0 0 10px 0", fontSize: "16px" }}>
                 Audio Preview
               </h2>
 
