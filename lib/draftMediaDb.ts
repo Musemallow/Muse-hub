@@ -1,71 +1,66 @@
 import { DraftPost } from "../types/createPost";
 
-const DB_NAME = "musehub-db";
-const STORE_NAME = "draft-posts";
-const DB_VERSION = 1;
+const STORAGE_KEY = "musehub-draft-posts";
 
-function openDb(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const request = window.indexedDB.open(DB_NAME, DB_VERSION);
+export function getDraftPosts(): DraftPost[] {
+  if (typeof window === "undefined") return [];
 
-    request.onerror = () => reject(request.error);
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
 
-    request.onsuccess = () => resolve(request.result);
+    const parsed = JSON.parse(raw);
 
-    request.onupgradeneeded = () => {
-      const db = request.result;
+    if (!Array.isArray(parsed)) return [];
 
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: "id" });
-      }
-    };
-  });
+    return parsed;
+  } catch {
+    return [];
+  }
 }
 
+export function saveDraftPosts(posts: DraftPost[]) {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+  } catch {
+    console.error("Failed to save draft posts.");
+  }
+}
+
+export function addDraftPost(post: DraftPost) {
+  const existing = getDraftPosts();
+  saveDraftPosts([post, ...existing]);
+}
+
+export function deleteDraftPost(draftId: string) {
+  const existing = getDraftPosts();
+  const updated = existing.filter((draft) => draft.id !== draftId);
+  saveDraftPosts(updated);
+}
+
+export function clearDraftPosts() {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    console.error("Failed to clear draft posts.");
+  }
+}
+
+/**
+ * Async aliases so your current FeedPage import style keeps working
+ */
 export async function getDraftPostsFromDb(): Promise<DraftPost[]> {
-  const db = await openDb();
-
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readonly");
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.getAll();
-
-    request.onerror = () => reject(request.error);
-
-    request.onsuccess = () => {
-      const results = Array.isArray(request.result) ? request.result : [];
-      results.sort((a, b) => {
-        const aTime = new Date(a.createdAt).getTime();
-        const bTime = new Date(b.createdAt).getTime();
-        return bTime - aTime;
-      });
-      resolve(results);
-    };
-  });
-}
-
-export async function addDraftPostToDb(post: DraftPost): Promise<void> {
-  const db = await openDb();
-
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.put(post);
-
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve();
-  });
+  return getDraftPosts();
 }
 
 export async function clearDraftPostsFromDb(): Promise<void> {
-  const db = await openDb();
+  clearDraftPosts();
+}
 
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.clear();
-
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve();
-  });
+export async function deleteDraftPostFromDb(draftId: string): Promise<void> {
+  deleteDraftPost(draftId);
 }

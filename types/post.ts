@@ -1,15 +1,15 @@
-export type ImageAttachment = {
+export type PostImage = {
   id: string;
   uri: string;
 };
 
-export type VideoAttachment = {
+export type PostVideo = {
   id: string;
   uri: string;
   title?: string;
 };
 
-export type AudioAttachment = {
+export type PostAudio = {
   id: string;
   uri: string;
   title?: string;
@@ -19,12 +19,12 @@ export type AudioAttachment = {
 export type Post = {
   id: string;
   authorName: string;
-  authorAvatar?: string;
   caption: string;
   createdAt: string;
-  images: ImageAttachment[];
-  videos: VideoAttachment[];
-  audios: AudioAttachment[];
+  images: PostImage[];
+  videos: PostVideo[];
+  audios: PostAudio[];
   likeCount: number;
   commentCount: number;
+  isDraft?: boolean;
 };

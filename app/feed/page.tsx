@@ -4,22 +4,41 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import PostCard from "../../components/PostCard";
 import { mockPosts } from "../../data/mockPosts";
-import { getDraftPostsFromDb, clearDraftPostsFromDb } from "../../lib/draftMediaDb";
+import {
+  clearDraftPostsFromDb,
+  deleteDraftPostFromDb,
+  getDraftPostsFromDb,
+} from "../../lib/draftMediaDb";
+import {
+  getPublishedPostsFromDb,
+  savePublishedPostToDb,
+} from "../../lib/publishedPostsDb";
 import { DraftPost } from "../../types/createPost";
 import { Post } from "../../types/post";
 
 export default function FeedPage() {
   const [draftPosts, setDraftPosts] = useState<DraftPost[]>([]);
+  const [publishedPosts, setPublishedPosts] = useState<Post[]>([]);
   const [hasLoadedDrafts, setHasLoadedDrafts] = useState(false);
+  const [activePostId, setActivePostId] = useState<string | null>(null);
 
   async function loadDrafts() {
     const drafts = await getDraftPostsFromDb();
     setDraftPosts(drafts);
+  }
+
+  async function loadPublishedPosts() {
+    const posts = await getPublishedPostsFromDb();
+    setPublishedPosts(posts);
+  }
+
+  async function loadAll() {
+    await Promise.all([loadDrafts(), loadPublishedPosts()]);
     setHasLoadedDrafts(true);
   }
 
   useEffect(() => {
-    loadDrafts();
+    loadAll();
   }, []);
 
   const combinedPosts = useMemo(() => {
@@ -45,10 +64,39 @@ export default function FeedPage() {
       })),
       likeCount: 0,
       commentCount: 0,
+      isDraft: true,
     }));
 
-    return [...mappedDrafts, ...mockPosts];
-  }, [draftPosts]);
+    return [...mappedDrafts, ...publishedPosts, ...mockPosts];
+  }, [draftPosts, publishedPosts]);
+
+  async function handlePublish(post: Post) {
+    try {
+      setActivePostId(post.id);
+
+      const publishedPost: Post = {
+        ...post,
+        createdAt: new Date().toLocaleString(),
+        isDraft: false,
+      };
+
+      await savePublishedPostToDb(publishedPost);
+      await deleteDraftPostFromDb(post.id);
+      await loadAll();
+    } finally {
+      setActivePostId(null);
+    }
+  }
+
+  async function handleDeleteDraft(postId: string) {
+    try {
+      setActivePostId(postId);
+      await deleteDraftPostFromDb(postId);
+      await loadDrafts();
+    } finally {
+      setActivePostId(null);
+    }
+  }
 
   async function handleClearDrafts() {
     await clearDraftPostsFromDb();
@@ -173,7 +221,15 @@ export default function FeedPage() {
             No posts yet.
           </div>
         ) : (
-          combinedPosts.map((post) => <PostCard key={post.id} post={post} />)
+          combinedPosts.map((post) => (
+            <PostCard
+              key={post.id}
+              post={post}
+              onPublish={handlePublish}
+              onDeleteDraft={handleDeleteDraft}
+              isBusy={activePostId === post.id}
+            />
+          ))
         )}
       </div>
     </main>

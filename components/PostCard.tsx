@@ -2,9 +2,17 @@ import { Post } from "../types/post";
 
 type Props = {
   post: Post;
+  onPublish?: (post: Post) => void;
+  onDeleteDraft?: (postId: string) => void;
+  isBusy?: boolean;
 };
 
-export default function PostCard({ post }: Props) {
+export default function PostCard({
+  post,
+  onPublish,
+  onDeleteDraft,
+  isBusy = false,
+}: Props) {
   return (
     <div
       style={{
@@ -22,9 +30,31 @@ export default function PostCard({ post }: Props) {
           marginBottom: 10,
           fontSize: 14,
           opacity: 0.9,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 12,
+          flexWrap: "wrap",
         }}
       >
-        <strong>{post.authorName}</strong> • {post.createdAt}
+        <div>
+          <strong>{post.authorName}</strong> • {post.createdAt}
+        </div>
+
+        {post.isDraft && (
+          <span
+            style={{
+              fontSize: 12,
+              padding: "4px 8px",
+              borderRadius: 999,
+              background: "rgba(80, 140, 255, 0.12)",
+              border: "1px solid rgba(80, 140, 255, 0.25)",
+              color: "#9fc2ff",
+            }}
+          >
+            Draft
+          </span>
+        )}
       </div>
 
       {post.caption && (
@@ -128,6 +158,53 @@ export default function PostCard({ post }: Props) {
       >
         ♥ {post.likeCount} • 💬 {post.commentCount}
       </div>
+
+      {post.isDraft && (
+        <div
+          style={{
+            marginTop: 14,
+            display: "flex",
+            gap: 10,
+            flexWrap: "wrap",
+          }}
+        >
+          <button
+            type="button"
+            disabled={isBusy}
+            onClick={() => onPublish?.(post)}
+            style={{
+              padding: "10px 14px",
+              borderRadius: "12px",
+              border: "1px solid rgba(80, 140, 255, 0.28)",
+              background: "rgba(80, 140, 255, 0.14)",
+              color: "#fff",
+              fontSize: "14px",
+              cursor: isBusy ? "not-allowed" : "pointer",
+              opacity: isBusy ? 0.6 : 1,
+            }}
+          >
+            {isBusy ? "Working..." : "Publish"}
+          </button>
+
+          <button
+            type="button"
+            disabled={isBusy}
+            onClick={() => onDeleteDraft?.(post.id)}
+            style={{
+              padding: "10px 14px",
+              borderRadius: "12px",
+              border: "1px solid rgba(255,255,255,0.08)",
+              background: "rgba(255,255,255,0.04)",
+              color: "#fff",
+              fontSize: "14px",
+              cursor: isBusy ? "not-allowed" : "pointer",
+              opacity: isBusy ? 0.6 : 1,
+            }}
+          >
+            {isBusy ? "Working..." : "Delete Draft"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
