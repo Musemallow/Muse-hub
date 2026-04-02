@@ -87,7 +87,7 @@ export default function Home() {
   }`}
 >
   Enter the Forest
-</button>
+</button> 
       </div>
     </main>
   );
