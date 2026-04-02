@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
-import { addDraftPostToDb } from "../../lib/draftMediaDb";
+import { addDraftPost } from "../../lib/draftMediaDb";
 import { DraftMediaFile, DraftPost } from "../../types/createPost";
 
 type LocalImage = {
@@ -294,7 +294,7 @@ export default function CreatePage() {
         createdAt: new Date().toISOString(),
       };
 
-      await addDraftPostToDb(draftPost);
+      addDraftPost(draftPost);
 
       clearComposer();
       setStatusMessage("Draft saved locally.");
