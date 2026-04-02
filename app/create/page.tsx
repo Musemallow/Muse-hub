@@ -1,9 +1,9 @@
 "use client";
 
+import Link from "next/link";
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { addDraftPost } from "../../data/draftPosts";
 import { DraftPost } from "../../types/createPost";
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 
 type LocalImage = {
   id: string;
@@ -65,6 +65,21 @@ export default function CreatePage() {
     URL.revokeObjectURL(url);
   }
 
+  function validateFileType(
+    file: File,
+    prefix: "image/" | "video/" | "audio/"
+  ) {
+    return file.type.startsWith(prefix);
+  }
+
+  function validateFileSize(file: File, maxBytes: number) {
+    return file.size <= maxBytes;
+  }
+
+  function formatMb(bytes: number) {
+    return `${Math.round(bytes / (1024 * 1024))} MB`;
+  }
+
   function buildImageItem(file: File): LocalImage {
     return {
       id: makeId(),
@@ -87,18 +102,6 @@ export default function CreatePage() {
       file,
       previewUrl: URL.createObjectURL(file),
     };
-  }
-
-  function validateFileType(file: File, prefix: "image/" | "video/" | "audio/") {
-    return file.type.startsWith(prefix);
-  }
-
-  function validateFileSize(file: File, maxBytes: number) {
-    return file.size <= maxBytes;
-  }
-
-  function formatMb(bytes: number) {
-    return `${Math.round(bytes / (1024 * 1024))} MB`;
   }
 
   function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
@@ -164,14 +167,15 @@ export default function CreatePage() {
 
     if (!validateFileSize(file, MAX_VIDEO_SIZE)) {
       setStatusMessage(
-        `"${file.name}" is too large. Max video size is ${formatMb(MAX_VIDEO_SIZE)}.`
+        `"${file.name}" is too large. Max video size is ${formatMb(
+          MAX_VIDEO_SIZE
+        )}.`
       );
       event.target.value = "";
       return;
     }
 
-    const newVideo = buildVideoItem(file);
-    setVideos([newVideo]);
+    setVideos([buildVideoItem(file)]);
     setStatusMessage("");
     event.target.value = "";
   }
@@ -196,14 +200,15 @@ export default function CreatePage() {
 
     if (!validateFileSize(file, MAX_AUDIO_SIZE)) {
       setStatusMessage(
-        `"${file.name}" is too large. Max audio size is ${formatMb(MAX_AUDIO_SIZE)}.`
+        `"${file.name}" is too large. Max audio size is ${formatMb(
+          MAX_AUDIO_SIZE
+        )}.`
       );
       event.target.value = "";
       return;
     }
 
-    const newAudio = buildAudioItem(file);
-    setAudios([newAudio]);
+    setAudios([buildAudioItem(file)]);
     setStatusMessage("");
     event.target.value = "";
   }
@@ -243,40 +248,40 @@ export default function CreatePage() {
     setAudios([]);
   }
 
-function handlePost() {
-  if (!canPost) return;
+  function handlePost() {
+    if (!canPost) return;
 
-  setIsPosting(true);
+    setIsPosting(true);
 
-  const draftPost: DraftPost = {
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-    caption: caption.trim(),
-    images: images.map((item) => ({
-      name: item.file.name,
-      type: item.file.type,
-      size: item.file.size,
-    })),
-    videos: videos.map((item) => ({
-      name: item.file.name,
-      type: item.file.type,
-      size: item.file.size,
-    })),
-    audios: audios.map((item) => ({
-      name: item.file.name,
-      type: item.file.type,
-      size: item.file.size,
-    })),
-    createdAt: new Date().toISOString(),
-  };
+    const draftPost: DraftPost = {
+      id: makeId(),
+      caption: caption.trim(),
+      images: images.map((item) => ({
+        name: item.file.name,
+        type: item.file.type,
+        size: item.file.size,
+      })),
+      videos: videos.map((item) => ({
+        name: item.file.name,
+        type: item.file.type,
+        size: item.file.size,
+      })),
+      audios: audios.map((item) => ({
+        name: item.file.name,
+        type: item.file.type,
+        size: item.file.size,
+      })),
+      createdAt: new Date().toISOString(),
+    };
 
-  console.log("Draft post created:", draftPost);
+    console.log("Draft post created:", draftPost);
+    addDraftPost(draftPost);
 
-  addDraftPost(draftPost);
+    clearComposer();
+    setStatusMessage("Draft saved locally.");
+    setIsPosting(false);
+  }
 
-  clearComposer();
-  setStatusMessage("Draft saved locally.");
-  setIsPosting(false);
-}
   return (
     <main
       style={{
@@ -299,8 +304,8 @@ function handlePost() {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: "20px",
             gap: "12px",
+            marginBottom: "20px",
           }}
         >
           <div>
@@ -385,9 +390,9 @@ function handlePost() {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
+              flexWrap: "wrap",
               gap: "12px",
               marginBottom: "16px",
-              flexWrap: "wrap",
             }}
           >
             <div
@@ -405,7 +410,8 @@ function handlePost() {
                 opacity: 0.65,
               }}
             >
-              {images.length}/{MAX_IMAGE_COUNT} images • {videos.length}/{MAX_VIDEO_COUNT} video • {audios.length}/{MAX_AUDIO_COUNT} audio
+              {images.length}/{MAX_IMAGE_COUNT} images • {videos.length}/
+              {MAX_VIDEO_COUNT} video • {audios.length}/{MAX_AUDIO_COUNT} audio
             </div>
           </div>
 
@@ -515,6 +521,7 @@ function handlePost() {
                         {image.file.name}
                       </div>
                       <button
+                        type="button"
                         onClick={() => removeImage(image.id)}
                         style={removeButtonStyle}
                       >
@@ -570,6 +577,7 @@ function handlePost() {
                         {video.file.name}
                       </div>
                       <button
+                        type="button"
                         onClick={() => removeVideo(video.id)}
                         style={removeButtonStyle}
                       >
@@ -622,6 +630,7 @@ function handlePost() {
                         {audio.file.name}
                       </div>
                       <button
+                        type="button"
                         onClick={() => removeAudio(audio.id)}
                         style={removeButtonStyle}
                       >
@@ -642,6 +651,7 @@ function handlePost() {
             }}
           >
             <button
+              type="button"
               disabled={!canPost}
               onClick={handlePost}
               style={{
