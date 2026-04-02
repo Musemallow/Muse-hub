@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import PostCard from "../../components/PostCard";
 import { mockPosts } from "../../data/mockPosts";
-import { getDraftPostsFromDb, clearDraftPostsFromDb } from "../../lib/draftMediaTEMP";
+import { getDraftPostsFromDb, clearDraftPostsFromDb } from "../../lib/draftMediaDb";
 import { DraftPost } from "../../types/createPost";
 import { Post } from "../../types/post";
 
