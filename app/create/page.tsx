@@ -1,5 +1,7 @@
 "use client";
 
+import { addDraftPost } from "../../data/draftPosts";
+import { DraftPost } from "../../types/createPost";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
@@ -241,38 +243,40 @@ export default function CreatePage() {
     setAudios([]);
   }
 
-  function handlePost() {
-    if (!canPost) return;
+function handlePost() {
+  if (!canPost) return;
 
-    setIsPosting(true);
+  setIsPosting(true);
 
-    const draftPost = {
-      caption: caption.trim(),
-      images: images.map((item) => ({
-        name: item.file.name,
-        type: item.file.type,
-        size: item.file.size,
-      })),
-      videos: videos.map((item) => ({
-        name: item.file.name,
-        type: item.file.type,
-        size: item.file.size,
-      })),
-      audios: audios.map((item) => ({
-        name: item.file.name,
-        type: item.file.type,
-        size: item.file.size,
-      })),
-      createdAt: new Date().toISOString(),
-    };
+  const draftPost: DraftPost = {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+    caption: caption.trim(),
+    images: images.map((item) => ({
+      name: item.file.name,
+      type: item.file.type,
+      size: item.file.size,
+    })),
+    videos: videos.map((item) => ({
+      name: item.file.name,
+      type: item.file.type,
+      size: item.file.size,
+    })),
+    audios: audios.map((item) => ({
+      name: item.file.name,
+      type: item.file.type,
+      size: item.file.size,
+    })),
+    createdAt: new Date().toISOString(),
+  };
 
-    console.log("Draft post created:", draftPost);
+  console.log("Draft post created:", draftPost);
 
-    clearComposer();
-    setStatusMessage("Draft post created locally. Feed wiring comes next.");
-    setIsPosting(false);
-  }
+  addDraftPost(draftPost);
 
+  clearComposer();
+  setStatusMessage("Draft saved locally.");
+  setIsPosting(false);
+}
   return (
     <main
       style={{
