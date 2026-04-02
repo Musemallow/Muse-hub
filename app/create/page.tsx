@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useMemo, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
 type LocalImage = {
@@ -21,24 +21,82 @@ type LocalAudio = {
   previewUrl: string;
 };
 
+const MAX_IMAGE_COUNT = 4;
+const MAX_VIDEO_COUNT = 1;
+const MAX_AUDIO_COUNT = 1;
+
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 MB
+const MAX_VIDEO_SIZE = 200 * 1024 * 1024; // 200 MB
+const MAX_AUDIO_SIZE = 50 * 1024 * 1024; // 50 MB
+
 export default function CreatePage() {
   const [caption, setCaption] = useState("");
   const [images, setImages] = useState<LocalImage[]>([]);
   const [videos, setVideos] = useState<LocalVideo[]>([]);
   const [audios, setAudios] = useState<LocalAudio[]>([]);
   const [statusMessage, setStatusMessage] = useState("");
+  const [isPosting, setIsPosting] = useState(false);
 
   const canPost = useMemo(() => {
     return (
-      caption.trim().length > 0 ||
-      images.length > 0 ||
-      videos.length > 0 ||
-      audios.length > 0
+      !isPosting &&
+      (caption.trim().length > 0 ||
+        images.length > 0 ||
+        videos.length > 0 ||
+        audios.length > 0)
     );
-  }, [caption, images, videos, audios]);
+  }, [caption, images, videos, audios, isPosting]);
+
+  useEffect(() => {
+    return () => {
+      images.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+      videos.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+      audios.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+    };
+  }, [images, videos, audios]);
 
   function makeId() {
     return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+  }
+
+  function revokePreviewUrl(url: string) {
+    URL.revokeObjectURL(url);
+  }
+
+  function buildImageItem(file: File): LocalImage {
+    return {
+      id: makeId(),
+      file,
+      previewUrl: URL.createObjectURL(file),
+    };
+  }
+
+  function buildVideoItem(file: File): LocalVideo {
+    return {
+      id: makeId(),
+      file,
+      previewUrl: URL.createObjectURL(file),
+    };
+  }
+
+  function buildAudioItem(file: File): LocalAudio {
+    return {
+      id: makeId(),
+      file,
+      previewUrl: URL.createObjectURL(file),
+    };
+  }
+
+  function validateFileType(file: File, prefix: "image/" | "video/" | "audio/") {
+    return file.type.startsWith(prefix);
+  }
+
+  function validateFileSize(file: File, maxBytes: number) {
+    return file.size <= maxBytes;
+  }
+
+  function formatMb(bytes: number) {
+    return `${Math.round(bytes / (1024 * 1024))} MB`;
   }
 
   function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
@@ -46,24 +104,41 @@ export default function CreatePage() {
     if (!fileList || fileList.length === 0) return;
 
     const selectedFiles = Array.from(fileList);
+    const remainingSlots = Math.max(0, MAX_IMAGE_COUNT - images.length);
 
-    const remainingSlots = Math.max(0, 4 - images.length);
-    const acceptedFiles = selectedFiles.slice(0, remainingSlots);
-
-    const newImages: LocalImage[] = acceptedFiles.map((file) => ({
-      id: makeId(),
-      file,
-      previewUrl: URL.createObjectURL(file),
-    }));
-
-    setImages((prev) => [...prev, ...newImages]);
-
-    if (selectedFiles.length > remainingSlots) {
-      setStatusMessage("Only up to 4 images allowed for now.");
-    } else {
-      setStatusMessage("");
+    if (remainingSlots === 0) {
+      setStatusMessage(`Only up to ${MAX_IMAGE_COUNT} images allowed for now.`);
+      event.target.value = "";
+      return;
     }
 
+    const acceptedFiles: File[] = [];
+    let message = "";
+
+    for (const file of selectedFiles) {
+      if (acceptedFiles.length >= remainingSlots) {
+        message = `Only up to ${MAX_IMAGE_COUNT} images allowed for now.`;
+        break;
+      }
+
+      if (!validateFileType(file, "image/")) {
+        message = `"${file.name}" is not a valid image file.`;
+        continue;
+      }
+
+      if (!validateFileSize(file, MAX_IMAGE_SIZE)) {
+        message = `"${file.name}" is too large. Max image size is ${formatMb(
+          MAX_IMAGE_SIZE
+        )}.`;
+        continue;
+      }
+
+      acceptedFiles.push(file);
+    }
+
+    const newImages = acceptedFiles.map(buildImageItem);
+    setImages((prev) => [...prev, ...newImages]);
+    setStatusMessage(message);
     event.target.value = "";
   }
 
@@ -73,18 +148,27 @@ export default function CreatePage() {
 
     const file = fileList[0];
 
-    if (videos.length >= 1) {
-      setStatusMessage("Only 1 video allowed for now.");
+    if (videos.length >= MAX_VIDEO_COUNT) {
+      setStatusMessage(`Only ${MAX_VIDEO_COUNT} video allowed for now.`);
       event.target.value = "";
       return;
     }
 
-    const newVideo: LocalVideo = {
-      id: makeId(),
-      file,
-      previewUrl: URL.createObjectURL(file),
-    };
+    if (!validateFileType(file, "video/")) {
+      setStatusMessage(`"${file.name}" is not a valid video file.`);
+      event.target.value = "";
+      return;
+    }
 
+    if (!validateFileSize(file, MAX_VIDEO_SIZE)) {
+      setStatusMessage(
+        `"${file.name}" is too large. Max video size is ${formatMb(MAX_VIDEO_SIZE)}.`
+      );
+      event.target.value = "";
+      return;
+    }
+
+    const newVideo = buildVideoItem(file);
     setVideos([newVideo]);
     setStatusMessage("");
     event.target.value = "";
@@ -96,18 +180,27 @@ export default function CreatePage() {
 
     const file = fileList[0];
 
-    if (audios.length >= 1) {
-      setStatusMessage("Only 1 audio file allowed for now.");
+    if (audios.length >= MAX_AUDIO_COUNT) {
+      setStatusMessage(`Only ${MAX_AUDIO_COUNT} audio file allowed for now.`);
       event.target.value = "";
       return;
     }
 
-    const newAudio: LocalAudio = {
-      id: makeId(),
-      file,
-      previewUrl: URL.createObjectURL(file),
-    };
+    if (!validateFileType(file, "audio/")) {
+      setStatusMessage(`"${file.name}" is not a valid audio file.`);
+      event.target.value = "";
+      return;
+    }
 
+    if (!validateFileSize(file, MAX_AUDIO_SIZE)) {
+      setStatusMessage(
+        `"${file.name}" is too large. Max audio size is ${formatMb(MAX_AUDIO_SIZE)}.`
+      );
+      event.target.value = "";
+      return;
+    }
+
+    const newAudio = buildAudioItem(file);
     setAudios([newAudio]);
     setStatusMessage("");
     event.target.value = "";
@@ -116,7 +209,7 @@ export default function CreatePage() {
   function removeImage(id: string) {
     setImages((prev) => {
       const target = prev.find((item) => item.id === id);
-      if (target) URL.revokeObjectURL(target.previewUrl);
+      if (target) revokePreviewUrl(target.previewUrl);
       return prev.filter((item) => item.id !== id);
     });
   }
@@ -124,7 +217,7 @@ export default function CreatePage() {
   function removeVideo(id: string) {
     setVideos((prev) => {
       const target = prev.find((item) => item.id === id);
-      if (target) URL.revokeObjectURL(target.previewUrl);
+      if (target) revokePreviewUrl(target.previewUrl);
       return prev.filter((item) => item.id !== id);
     });
   }
@@ -132,42 +225,52 @@ export default function CreatePage() {
   function removeAudio(id: string) {
     setAudios((prev) => {
       const target = prev.find((item) => item.id === id);
-      if (target) URL.revokeObjectURL(target.previewUrl);
+      if (target) revokePreviewUrl(target.previewUrl);
       return prev.filter((item) => item.id !== id);
     });
   }
 
-  function handlePost() {
-    if (!canPost) return;
-
-    const draftPost = {
-      caption,
-      images: images.map((item) => ({
-        name: item.file.name,
-        type: item.file.type,
-      })),
-      videos: videos.map((item) => ({
-        name: item.file.name,
-        type: item.file.type,
-      })),
-      audios: audios.map((item) => ({
-        name: item.file.name,
-        type: item.file.type,
-      })),
-    };
-
-    console.log("Draft post created:", draftPost);
-
-    setStatusMessage("Draft post created locally. Feed wiring comes next.");
-
-    images.forEach((item) => URL.revokeObjectURL(item.previewUrl));
-    videos.forEach((item) => URL.revokeObjectURL(item.previewUrl));
-    audios.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+  function clearComposer() {
+    images.forEach((item) => revokePreviewUrl(item.previewUrl));
+    videos.forEach((item) => revokePreviewUrl(item.previewUrl));
+    audios.forEach((item) => revokePreviewUrl(item.previewUrl));
 
     setCaption("");
     setImages([]);
     setVideos([]);
     setAudios([]);
+  }
+
+  function handlePost() {
+    if (!canPost) return;
+
+    setIsPosting(true);
+
+    const draftPost = {
+      caption: caption.trim(),
+      images: images.map((item) => ({
+        name: item.file.name,
+        type: item.file.type,
+        size: item.file.size,
+      })),
+      videos: videos.map((item) => ({
+        name: item.file.name,
+        type: item.file.type,
+        size: item.file.size,
+      })),
+      audios: audios.map((item) => ({
+        name: item.file.name,
+        type: item.file.type,
+        size: item.file.size,
+      })),
+      createdAt: new Date().toISOString(),
+    };
+
+    console.log("Draft post created:", draftPost);
+
+    clearComposer();
+    setStatusMessage("Draft post created locally. Feed wiring comes next.");
+    setIsPosting(false);
   }
 
   return (
@@ -257,6 +360,7 @@ export default function CreatePage() {
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
             placeholder="What do you want to share?"
+            maxLength={2000}
             style={{
               width: "100%",
               minHeight: "130px",
@@ -275,14 +379,41 @@ export default function CreatePage() {
           <div
             style={{
               display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: "12px",
+              marginBottom: "16px",
+              flexWrap: "wrap",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "13px",
+                opacity: 0.65,
+              }}
+            >
+              {caption.length}/2000
+            </div>
+
+            <div
+              style={{
+                fontSize: "13px",
+                opacity: 0.65,
+              }}
+            >
+              {images.length}/{MAX_IMAGE_COUNT} images • {videos.length}/{MAX_VIDEO_COUNT} video • {audios.length}/{MAX_AUDIO_COUNT} audio
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
               flexWrap: "wrap",
               gap: "10px",
               marginBottom: "18px",
             }}
           >
-            <label
-              style={pickerButtonStyle}
-            >
+            <label style={pickerButtonStyle}>
               + Image
               <input
                 type="file"
@@ -293,9 +424,7 @@ export default function CreatePage() {
               />
             </label>
 
-            <label
-              style={pickerButtonStyle}
-            >
+            <label style={pickerButtonStyle}>
               + Video
               <input
                 type="file"
@@ -305,9 +434,7 @@ export default function CreatePage() {
               />
             </label>
 
-            <label
-              style={pickerButtonStyle}
-            >
+            <label style={pickerButtonStyle}>
               + Audio
               <input
                 type="file"
@@ -528,7 +655,7 @@ export default function CreatePage() {
                 fontWeight: 600,
               }}
             >
-              Create Local Draft
+              {isPosting ? "Creating..." : "Create Local Draft"}
             </button>
           </div>
         </div>
