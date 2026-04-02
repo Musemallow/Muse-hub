@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
-import { addDraftPost } from "../../data/draftPosts";
-import { DraftPost } from "../../types/createPost";
+import { addDraftPostToDb } from "../../lib/draftMediaDb";
+import { DraftMediaFile, DraftPost } from "../../types/createPost";
 
 type LocalImage = {
   id: string;
@@ -248,38 +248,62 @@ export default function CreatePage() {
     setAudios([]);
   }
 
-  function handlePost() {
+  function fileToDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        if (typeof reader.result === "string") {
+          resolve(reader.result);
+        } else {
+          reject(new Error("Failed to convert file to data URL."));
+        }
+      };
+
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function mapLocalFilesToDraftMedia<T extends { file: File }>(
+    items: T[]
+  ): Promise<DraftMediaFile[]> {
+    return Promise.all(
+      items.map(async (item) => ({
+        name: item.file.name,
+        type: item.file.type,
+        size: item.file.size,
+        dataUrl: await fileToDataUrl(item.file),
+      }))
+    );
+  }
+
+  async function handlePost() {
     if (!canPost) return;
 
-    setIsPosting(true);
+    try {
+      setIsPosting(true);
+      setStatusMessage("Saving draft...");
 
-    const draftPost: DraftPost = {
-      id: makeId(),
-      caption: caption.trim(),
-      images: images.map((item) => ({
-        name: item.file.name,
-        type: item.file.type,
-        size: item.file.size,
-      })),
-      videos: videos.map((item) => ({
-        name: item.file.name,
-        type: item.file.type,
-        size: item.file.size,
-      })),
-      audios: audios.map((item) => ({
-        name: item.file.name,
-        type: item.file.type,
-        size: item.file.size,
-      })),
-      createdAt: new Date().toISOString(),
-    };
+      const draftPost: DraftPost = {
+        id: makeId(),
+        caption: caption.trim(),
+        images: await mapLocalFilesToDraftMedia(images),
+        videos: await mapLocalFilesToDraftMedia(videos),
+        audios: await mapLocalFilesToDraftMedia(audios),
+        createdAt: new Date().toISOString(),
+      };
 
-    console.log("Draft post created:", draftPost);
-    addDraftPost(draftPost);
+      await addDraftPostToDb(draftPost);
 
-    clearComposer();
-    setStatusMessage("Draft saved locally.");
-    setIsPosting(false);
+      clearComposer();
+      setStatusMessage("Draft saved locally.");
+    } catch (error) {
+      console.error(error);
+      setStatusMessage("Failed to save draft.");
+    } finally {
+      setIsPosting(false);
+    }
   }
 
   return (

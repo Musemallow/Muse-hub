@@ -69,7 +69,20 @@ export default function PostCard({ post }: Props) {
                 marginBottom: 8,
               }}
             >
-              🎬 {vid.title || "Video"}
+              {vid.uri ? (
+                <video
+                  src={vid.uri}
+                  controls
+                  style={{
+                    width: "100%",
+                    borderRadius: 12,
+                    marginBottom: 10,
+                    background: "#000",
+                  }}
+                />
+              ) : null}
+
+              <div>{vid.title || "Video"}</div>
             </div>
           ))}
         </div>
@@ -87,7 +100,20 @@ export default function PostCard({ post }: Props) {
                 marginBottom: 8,
               }}
             >
-              🎧 {aud.title || "Audio"} ({aud.duration || "--:--"})
+              {aud.uri ? (
+                <audio
+                  src={aud.uri}
+                  controls
+                  style={{
+                    width: "100%",
+                    marginBottom: 10,
+                  }}
+                />
+              ) : null}
+
+              <div>
+                🎧 {aud.title || "Audio"} ({aud.duration || "--:--"})
+              </div>
             </div>
           ))}
         </div>

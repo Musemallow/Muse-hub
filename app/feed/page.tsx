@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import PostCard from "../../components/PostCard";
-import { getDraftPosts } from "../../data/draftPosts";
 import { mockPosts } from "../../data/mockPosts";
+import { getDraftPostsFromDb, clearDraftPostsFromDb } from "../../lib/draftMediaDb";
 import { DraftPost } from "../../types/createPost";
 import { Post } from "../../types/post";
 
@@ -12,10 +12,14 @@ export default function FeedPage() {
   const [draftPosts, setDraftPosts] = useState<DraftPost[]>([]);
   const [hasLoadedDrafts, setHasLoadedDrafts] = useState(false);
 
-  useEffect(() => {
-    const drafts = getDraftPosts();
+  async function loadDrafts() {
+    const drafts = await getDraftPostsFromDb();
     setDraftPosts(drafts);
     setHasLoadedDrafts(true);
+  }
+
+  useEffect(() => {
+    loadDrafts();
   }, []);
 
   const combinedPosts = useMemo(() => {
@@ -26,18 +30,16 @@ export default function FeedPage() {
       createdAt: "Local draft",
       images: draft.images.map((image, index) => ({
         id: `${draft.id}-image-${index}`,
-        uri: `https://placehold.co/900x600?text=${encodeURIComponent(
-          image.name || "Draft Image"
-        )}`,
+        uri: image.dataUrl,
       })),
       videos: draft.videos.map((video, index) => ({
         id: `${draft.id}-video-${index}`,
-        uri: "",
+        uri: video.dataUrl,
         title: video.name || "Draft Video",
       })),
       audios: draft.audios.map((audio, index) => ({
         id: `${draft.id}-audio-${index}`,
-        uri: "",
+        uri: audio.dataUrl,
         title: audio.name || "Draft Audio",
         duration: "--:--",
       })),
@@ -47,6 +49,11 @@ export default function FeedPage() {
 
     return [...mappedDrafts, ...mockPosts];
   }, [draftPosts]);
+
+  async function handleClearDrafts() {
+    await clearDraftPostsFromDb();
+    await loadDrafts();
+  }
 
   return (
     <main
@@ -133,6 +140,22 @@ export default function FeedPage() {
             >
               Create Post
             </Link>
+
+            <button
+              type="button"
+              onClick={handleClearDrafts}
+              style={{
+                padding: "10px 14px",
+                borderRadius: "12px",
+                border: "1px solid rgba(255,255,255,0.08)",
+                background: "rgba(255,255,255,0.04)",
+                color: "#fff",
+                fontSize: "14px",
+                cursor: "pointer",
+              }}
+            >
+              Clear Drafts
+            </button>
           </div>
         </div>
 

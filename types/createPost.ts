@@ -2,7 +2,7 @@ export type DraftMediaFile = {
   name: string;
   type: string;
   size: number;
-  previewUrl?: string;
+  dataUrl: string;
 };
 
 export type DraftPost = {
