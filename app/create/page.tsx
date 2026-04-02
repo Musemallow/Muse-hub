@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
-import { addDraftPostToDb } from "../../lib/draftMediaDb"; 
+import { addDraftPostToDb } from "../../lib/draftMediaDb";
 import { DraftMediaFile, DraftPost } from "../../types/createPost";
 
 type LocalImage = {
