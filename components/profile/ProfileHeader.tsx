@@ -1,11 +1,15 @@
 import Image from "next/image";
-import { ProfileData } from "../../data/mockProfile";
+import { Profile } from "../../data/mockProfile";
 
 type ProfileHeaderProps = {
-  profile: ProfileData;
+  profile: Profile;
+  onEdit?: () => void;
 };
 
-export default function ProfileHeader({ profile }: ProfileHeaderProps) {
+export default function ProfileHeader({
+  profile,
+  onEdit,
+}: ProfileHeaderProps) {
   return (
     <section className="overflow-hidden rounded-[28px] border border-cyan-400/20 bg-black/40 shadow-[0_0_30px_rgba(34,211,238,0.08)] backdrop-blur-md">
       <div className="relative h-48 w-full sm:h-60 md:h-72">
@@ -45,12 +49,15 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
               </div>
             </div>
 
-            <button
-              type="button"
-              className="inline-flex items-center justify-center rounded-2xl border border-cyan-400/40 bg-cyan-400/10 px-5 py-3 text-sm font-semibold text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-400/20 hover:text-white"
-            >
-              Edit Profile
-            </button>
+            {onEdit && (
+              <button
+                type="button"
+                onClick={onEdit}
+                className="inline-flex items-center justify-center rounded-2xl border border-cyan-400/40 bg-cyan-400/10 px-5 py-3 text-sm font-semibold text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-400/20 hover:text-white"
+              >
+                Edit Profile
+              </button>
+            )}
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">

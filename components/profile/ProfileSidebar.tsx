@@ -1,7 +1,7 @@
-import { ProfileData } from "../../data/mockProfile";
+import { Profile } from "../../data/mockProfile";
 
 type ProfileSidebarProps = {
-  profile: ProfileData;
+  profile: Profile;
 };
 
 export default function ProfileSidebar({ profile }: ProfileSidebarProps) {
@@ -35,6 +35,13 @@ export default function ProfileSidebar({ profile }: ProfileSidebarProps) {
               <p className="mt-1 text-white">{profile.discord}</p>
             </div>
           )}
+
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
+              Points
+            </p>
+            <p className="mt-1 text-white">{profile.points}</p>
+          </div>
         </div>
       </section>
 

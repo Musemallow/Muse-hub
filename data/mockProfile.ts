@@ -1,4 +1,5 @@
-export type ProfileData = {
+export type Profile = {
+  id: string;
   username: string;
   displayName: string;
   status: string;
@@ -6,6 +7,9 @@ export type ProfileData = {
   discord?: string;
   avatarUrl: string;
   bannerUrl: string;
+  themeMode: "nox" | "sol";
+  points: number;
+  isCreator: boolean;
   stats: {
     posts: number;
     clips: number;
@@ -18,7 +22,8 @@ export type ProfileData = {
   }[];
 };
 
-export const mockProfile: ProfileData = {
+export const mockProfile: Profile = {
+  id: "muse-001",
   username: "musemallow",
   displayName: "MuseMallow",
   status: "Local forest spirit, definitely not a cryptid.",
@@ -26,6 +31,9 @@ export const mockProfile: ProfileData = {
   discord: "musemallow",
   avatarUrl: "/images/profile-avatar.png",
   bannerUrl: "/images/profile-banner.png",
+  themeMode: "nox",
+  points: 1460,
+  isCreator: true,
   stats: {
     posts: 28,
     clips: 12,
