@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import ProfileView from "../../../components/profile/ProfileView";
-import { mockProfiles } from "../../../data/mockProfiles";
 import { getSupabaseClient } from "../../../lib/supabase";
 import { Profile } from "../../../types/profile";
 
@@ -13,7 +12,7 @@ const defaultProfile: Profile = {
   username: "new-wanderer",
   displayName: "New Wanderer",
   status: "New signal detected.",
-  bio: "A new member profile preview. Once Supabase Auth is connected, this will become a real account setup flow.",
+  bio: "A new member profile for The Forest.",
   socialHandle: "",
   avatarUrl: "/images/profile-avatar.svg",
   bannerUrl: "/images/profile-banner-placeholder.svg",
@@ -49,15 +48,11 @@ export default function CreateAccountPage() {
 
   const normalizedUsername = normalizeUsername(username);
   const normalizedEmail = email.trim().toLowerCase();
-  const usernameIsTaken = mockProfiles.some(
-    (profile) => profile.username.toLowerCase() === normalizedUsername
-  );
   const passwordRules = getPasswordRules(password);
   const passwordIsValid = passwordRules.every((rule) => rule.valid);
   const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail);
   const canSubmit =
     emailIsValid &&
-    !usernameIsTaken &&
     normalizedUsername.length >= 3 &&
     passwordIsValid;
 
@@ -171,11 +166,9 @@ export default function CreateAccountPage() {
                   value={username}
                   onChange={setUsername}
                   autoComplete="username"
-                  message={getUsernameMessage(
-                    normalizedUsername,
-                    usernameIsTaken
-                  )}
-                  isInvalid={usernameIsTaken || normalizedUsername.length < 3}
+                  maxLength={32}
+                  message={getUsernameMessage(normalizedUsername)}
+                  isInvalid={normalizedUsername.length < 3}
                 />
                 <ProfileField
                   label="Password"
@@ -190,16 +183,19 @@ export default function CreateAccountPage() {
                   label="Display Name"
                   value={displayName}
                   onChange={setDisplayName}
+                  maxLength={80}
                 />
                 <ProfileField
                   label="Status"
                   value={status}
                   onChange={setStatus}
+                  maxLength={160}
                 />
                 <ProfileField
                   label="Social Handle"
                   value={socialHandle}
                   onChange={setSocialHandle}
+                  maxLength={80}
                 />
                 <label className="block">
                   <span className="mb-2 block text-xs uppercase tracking-[0.22em] text-zinc-500">
@@ -208,6 +204,7 @@ export default function CreateAccountPage() {
                   <textarea
                     value={bio}
                     onChange={(event) => setBio(event.target.value)}
+                    maxLength={1000}
                     rows={5}
                     className="w-full rounded-[8px] border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-blue-400/45"
                   />
@@ -259,6 +256,7 @@ function ProfileField({
   autoComplete,
   message,
   isInvalid = false,
+  maxLength,
 }: {
   label: string;
   type?: "email" | "password" | "text";
@@ -267,6 +265,7 @@ function ProfileField({
   autoComplete?: string;
   message?: string;
   isInvalid?: boolean;
+  maxLength?: number;
 }) {
   return (
     <label className="block">
@@ -277,6 +276,7 @@ function ProfileField({
         type={type}
         value={value}
         autoComplete={autoComplete}
+        maxLength={maxLength}
         onChange={(event) => onChange(event.target.value)}
         className={`w-full rounded-[8px] border bg-white/[0.04] px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-blue-400/45 ${
           isInvalid ? "border-red-400/55" : "border-white/10"
@@ -330,10 +330,9 @@ function getEmailMessage(
   return "Email format is valid. Supabase will confirm availability.";
 }
 
-function getUsernameMessage(username: string, usernameIsTaken: boolean) {
+function getUsernameMessage(username: string) {
   if (username.length < 3) return "Username needs at least 3 characters.";
-  if (usernameIsTaken) return "That username is already taken.";
-  return "Username is available.";
+  return "Username format is valid. Supabase will confirm availability.";
 }
 
 function getPasswordRules(password: string) {

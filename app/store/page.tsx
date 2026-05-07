@@ -17,8 +17,8 @@ export default function StorePage() {
           </h1>
           <p className="mt-4 max-w-3xl text-sm leading-7 text-zinc-400 sm:text-base">
             A home for merch, digital packs, member perks, and seasonal MuseHub
-            items. Product cards can show pictures here, then send wanderers to
-            the right external shop or platform.
+            items. Product cards show pictures and details here, then send
+            wanderers to the external platform that handles checkout.
           </p>
         </section>
 
@@ -28,7 +28,7 @@ export default function StorePage() {
               key={drop.id}
               href={drop.externalUrl}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5"
             >
               <div className="relative mb-5 aspect-[16/10] overflow-hidden rounded-[8px] border border-white/10">

@@ -2,20 +2,28 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ChannelMessage,
   discussionCategories,
 } from "../../data/discussionThreads";
-import { mockProfile } from "../../data/mockProfile";
 import { getProfilePermissions } from "../../lib/profilePermissions";
+import { getCurrentProfileFromSupabase } from "../../lib/profiles";
+import { Profile, ProfilePermissions } from "../../types/profile";
 
 const sampleGifUrl =
   "data:image/gif;base64,R0lGODlhAQABAPAAAJYpKf///yH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==";
 const sampleImageUrl = "/images/musemallow-banner.jpeg";
+const loggedOutPermissions: ProfilePermissions = {
+  canPost: false,
+  canMessage: false,
+  canComment: false,
+  canCommentWithImages: false,
+  canCommentWithGifs: false,
+};
 
 export default function DiscussionsPage() {
-  const permissions = getProfilePermissions(mockProfile);
+  const [currentProfile, setCurrentProfile] = useState<Profile | null>(null);
   const channels = useMemo(
     () => discussionCategories.flatMap((category) => category.channels),
     []
@@ -29,12 +37,41 @@ export default function DiscussionsPage() {
       channels.map((channel) => [channel.id, channel.messages])
     )
   );
+  const permissions = currentProfile
+    ? getProfilePermissions(currentProfile)
+    : loggedOutPermissions;
 
   const activeChannel =
     channels.find((channel) => channel.id === activeChannelId) ?? channels[0];
   const activeMessages = messagesByChannel[activeChannel.id] ?? [];
 
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadProfile() {
+      try {
+        const profile = await getCurrentProfileFromSupabase();
+
+        if (isMounted) {
+          setCurrentProfile(profile);
+        }
+      } catch {
+        if (isMounted) {
+          setCurrentProfile(null);
+        }
+      }
+    }
+
+    loadProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   function handleSubmitMessage(attachmentType?: "gif" | "image") {
+    if (!currentProfile) return;
+
     const body = draftMessage.trim();
     const attachment =
       attachmentType === "gif"
@@ -55,10 +92,14 @@ export default function DiscussionsPage() {
 
     const newMessage: ChannelMessage = {
       id: `${activeChannel.id}-${Date.now()}`,
-      authorName: mockProfile.displayName,
-      authorUsername: mockProfile.username,
+      authorName: currentProfile.displayName,
+      authorUsername: currentProfile.username,
       authorRole:
-        mockProfile.membership.tier === "premium" ? "premium" : "member",
+        currentProfile.isCreator
+          ? "owner"
+          : currentProfile.membership.tier === "premium"
+            ? "premium"
+            : "member",
       createdAt: "Just now",
       body: body || `Shared ${attachment?.label}`,
       attachmentLabel: attachment?.label,

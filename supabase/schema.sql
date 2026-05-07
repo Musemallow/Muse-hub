@@ -20,22 +20,35 @@ create table public.profiles (
   points integer not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  constraint username_format check (username ~ '^[a-z0-9_-]{3,32}$')
+  constraint username_format check (username ~ '^[a-z0-9_-]{3,32}$'),
+  constraint display_name_length check (char_length(display_name) between 1 and 80),
+  constraint status_length check (char_length(status) <= 160),
+  constraint bio_length check (char_length(bio) <= 1000),
+  constraint social_handle_length check (social_handle is null or char_length(social_handle) <= 80)
 );
 
 alter table public.profiles enable row level security;
+
+revoke insert, update, delete on public.profiles from anon, authenticated;
+grant select on public.profiles to anon, authenticated;
+grant update (
+  username,
+  display_name,
+  bio,
+  status,
+  social_handle,
+  avatar_url,
+  banner_url,
+  theme_mode,
+  updated_at
+) on public.profiles to authenticated;
 
 create policy "Profiles are readable by everyone"
   on public.profiles
   for select
   using (true);
 
-create policy "Members can create their own profile"
-  on public.profiles
-  for insert
-  with check (auth.uid() = id);
-
-create policy "Members can update their own profile"
+create policy "Members can update their own editable profile fields"
   on public.profiles
   for update
   using (auth.uid() = id)

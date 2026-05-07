@@ -3,10 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
-import { mockProfile } from "../../data/mockProfile";
 import { addDraftPost } from "../../lib/draftMediaDb";
 import { getProfilePermissions } from "../../lib/profilePermissions";
+import { getCurrentProfileFromSupabase } from "../../lib/profiles";
 import { DraftMediaFile, DraftPost } from "../../types/createPost";
+import { Profile } from "../../types/profile";
 
 type LocalImage = {
   id: string;
@@ -35,23 +36,63 @@ const MAX_VIDEO_SIZE = 200 * 1024 * 1024;
 const MAX_AUDIO_SIZE = 50 * 1024 * 1024;
 
 export default function CreatePage() {
-  const viewerPermissions = getProfilePermissions(mockProfile);
+  const [currentProfile, setCurrentProfile] = useState<Profile | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [profileError, setProfileError] = useState("");
   const [caption, setCaption] = useState("");
   const [images, setImages] = useState<LocalImage[]>([]);
   const [videos, setVideos] = useState<LocalVideo[]>([]);
   const [audios, setAudios] = useState<LocalAudio[]>([]);
   const [statusMessage, setStatusMessage] = useState("");
   const [isPosting, setIsPosting] = useState(false);
+  const viewerPermissions = useMemo(
+    () => (currentProfile ? getProfilePermissions(currentProfile) : null),
+    [currentProfile]
+  );
 
   const canPost = useMemo(() => {
     return (
       !isPosting &&
+      Boolean(viewerPermissions?.canPost) &&
       (caption.trim().length > 0 ||
         images.length > 0 ||
         videos.length > 0 ||
         audios.length > 0)
     );
-  }, [caption, images, videos, audios, isPosting]);
+  }, [caption, images, videos, audios, isPosting, viewerPermissions?.canPost]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadProfile() {
+      try {
+        const profile = await getCurrentProfileFromSupabase();
+
+        if (!isMounted) return;
+
+        setCurrentProfile(profile);
+        setProfileError("");
+      } catch (error) {
+        if (!isMounted) return;
+
+        setProfileError(
+          error instanceof Error
+            ? error.message
+            : "Unable to check creator access."
+        );
+      } finally {
+        if (isMounted) {
+          setIsLoadingProfile(false);
+        }
+      }
+    }
+
+    loadProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -61,52 +102,18 @@ export default function CreatePage() {
     };
   }, [images, videos, audios]);
 
-  if (!viewerPermissions.canPost) {
-    return (
-      <main
-        style={{
-          minHeight: "100vh",
-          background: "#000",
-          color: "#fff",
-          padding: "28px 16px",
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
-        <div style={{ width: "100%", maxWidth: "760px" }}>
-          <Link
-            href="/hub"
-            style={{
-              display: "inline-flex",
-              marginBottom: 20,
-              padding: "10px 14px",
-              borderRadius: "12px",
-              border: "1px solid rgba(80, 140, 255, 0.18)",
-              background: "#0b0b0f",
-              color: "#fff",
-              fontSize: "14px",
-              textDecoration: "none",
-            }}
-          >
-            Back to Hub
-          </Link>
+  if (isLoadingProfile) {
+    return <CreatorAccessMessage body="Checking creator access..." />;
+  }
 
-          <section
-            style={{
-              background: "#0b0b0f",
-              border: "1px solid rgba(80, 140, 255, 0.14)",
-              borderRadius: 18,
-              padding: 18,
-              boxShadow: "0 0 24px rgba(0, 80, 255, 0.08)",
-            }}
-          >
-            <h1 style={{ margin: 0, fontSize: 24 }}>Creator Access</h1>
-            <p style={{ margin: "10px 0 0 0", color: "rgba(255,255,255,0.72)" }}>
-              Posting tools are available only to the profile owner.
-            </p>
-          </section>
-        </div>
-      </main>
+  if (!viewerPermissions?.canPost) {
+    return (
+      <CreatorAccessMessage
+        body={
+          profileError ||
+          "Posting tools are available only to the profile owner."
+        }
+      />
     );
   }
 
@@ -745,6 +752,55 @@ function EmptyBlock({ text }: { text: string }) {
     >
       {text}
     </div>
+  );
+}
+
+function CreatorAccessMessage({ body }: { body: string }) {
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "#000",
+        color: "#fff",
+        padding: "28px 16px",
+        display: "flex",
+        justifyContent: "center",
+      }}
+    >
+      <div style={{ width: "100%", maxWidth: "760px" }}>
+        <Link
+          href="/hub"
+          style={{
+            display: "inline-flex",
+            marginBottom: 20,
+            padding: "10px 14px",
+            borderRadius: "12px",
+            border: "1px solid rgba(80, 140, 255, 0.18)",
+            background: "#0b0b0f",
+            color: "#fff",
+            fontSize: "14px",
+            textDecoration: "none",
+          }}
+        >
+          Back to Hub
+        </Link>
+
+        <section
+          style={{
+            background: "#0b0b0f",
+            border: "1px solid rgba(80, 140, 255, 0.14)",
+            borderRadius: 18,
+            padding: 18,
+            boxShadow: "0 0 24px rgba(0, 80, 255, 0.08)",
+          }}
+        >
+          <h1 style={{ margin: 0, fontSize: 24 }}>Creator Access</h1>
+          <p style={{ margin: "10px 0 0 0", color: "rgba(255,255,255,0.72)" }}>
+            {body}
+          </p>
+        </section>
+      </div>
+    </main>
   );
 }
 

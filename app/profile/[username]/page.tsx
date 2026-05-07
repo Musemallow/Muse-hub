@@ -1,9 +1,5 @@
 import { notFound } from "next/navigation";
 import ProfileView from "../../../components/profile/ProfileView";
-import {
-  getProfileByUsername,
-  mockProfiles,
-} from "../../../data/mockProfiles";
 import { getProfileByUsernameFromSupabase } from "../../../lib/profiles";
 
 type UserProfilePageProps = {
@@ -13,12 +9,6 @@ type UserProfilePageProps = {
 };
 
 export const dynamic = "force-dynamic";
-
-export function generateStaticParams() {
-  return mockProfiles.map((profile) => ({
-    username: profile.username,
-  }));
-}
 
 export default async function UserProfilePage({
   params,
@@ -35,11 +25,8 @@ export default async function UserProfilePage({
 
 async function loadProfile(username: string) {
   try {
-    return (
-      (await getProfileByUsernameFromSupabase(username)) ??
-      getProfileByUsername(username)
-    );
+    return await getProfileByUsernameFromSupabase(username);
   } catch {
-    return getProfileByUsername(username);
+    return null;
   }
 }

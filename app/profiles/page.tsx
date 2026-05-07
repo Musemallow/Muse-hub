@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { mockProfiles } from "../../data/mockProfiles";
 import { getProfilesFromSupabase } from "../../lib/profiles";
 
 export const dynamic = "force-dynamic";
@@ -42,8 +41,8 @@ export default async function ProfilesPage() {
             Wanderer Profiles
           </h1>
           <p className="mt-4 max-w-3xl text-sm leading-7 text-zinc-400 sm:text-base">
-            Member identities from Supabase, with mock profiles shown if the
-            database has not collected members yet.
+            Member identities from Supabase. New accounts will appear here
+            after signup creates their profile record.
           </p>
           <Link
             href="/join/create"
@@ -53,8 +52,17 @@ export default async function ProfilesPage() {
           </Link>
         </section>
 
-        <section className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {profiles.map((profile) => (
+        {profiles.length === 0 ? (
+          <section className="mt-5 rounded-[8px] border border-white/10 bg-white/[0.04] p-5">
+            <h2 className="text-xl font-bold text-white">No profiles yet</h2>
+            <p className="mt-2 text-sm leading-7 text-zinc-400">
+              Create your account first, then refresh this page after Supabase
+              creates the profile row.
+            </p>
+          </section>
+        ) : (
+          <section className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {profiles.map((profile) => (
             <Link
               key={profile.id}
               href={`/profile/${profile.username}`}
@@ -104,8 +112,9 @@ export default async function ProfilesPage() {
                 </div>
               </div>
             </Link>
-          ))}
-        </section>
+            ))}
+          </section>
+        )}
       </div>
     </main>
   );
@@ -113,9 +122,8 @@ export default async function ProfilesPage() {
 
 async function loadProfiles() {
   try {
-    const profiles = await getProfilesFromSupabase();
-    return profiles.length > 0 ? profiles : mockProfiles;
+    return await getProfilesFromSupabase();
   } catch {
-    return mockProfiles;
+    return [];
   }
 }

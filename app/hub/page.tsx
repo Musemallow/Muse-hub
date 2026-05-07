@@ -6,8 +6,13 @@ import {
   upcomingEvents,
 } from "../../data/landingContent";
 import { discussionCategories } from "../../data/discussionThreads";
-import { mockProfile } from "../../data/mockProfile";
 import "../entrance.css";
+
+const creatorOverview = {
+  bannerUrl: "/images/musemallow-banner.jpeg",
+  membershipTier: "premium",
+  points: 1460,
+};
 
 export default function HubPage() {
   const latestChannel =
@@ -22,7 +27,7 @@ export default function HubPage() {
     <main className="landing-page min-h-screen bg-[#020309] text-white">
       <section className="landing-hero relative flex min-h-[92vh] items-end overflow-hidden px-4 pb-10 pt-44 sm:px-6 sm:pt-36 lg:px-8 lg:pt-36">
         <Image
-          src={mockProfile.bannerUrl}
+          src={creatorOverview.bannerUrl}
           alt="MuseMallow forest banner"
           fill
           priority
@@ -104,8 +109,8 @@ export default function HubPage() {
           </div>
 
           <div className="grid gap-3 rounded-[8px] border border-blue-400/15 bg-black/60 p-4 shadow-[0_18px_45px_rgba(0,0,0,0.28)] backdrop-blur-xl sm:grid-cols-3 lg:grid-cols-1">
-            <HubStat label="Member" value={mockProfile.membership.tier} />
-            <HubStat label="Points" value={String(mockProfile.points)} />
+            <HubStat label="Member" value={creatorOverview.membershipTier} />
+            <HubStat label="Points" value={String(creatorOverview.points)} />
             <HubStat label="Next Event" value="Sunday / 8 PM" />
           </div>
         </div>

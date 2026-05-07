@@ -1,6 +1,6 @@
 # MuseHub Project Notes
 
-MuseHub is MuseMallow's creator-centric community platform. It is a personal creator hub with Patreon-inspired memberships, creator updates, multimedia posts, member comments, profile identity, events, store drops, and eventual Supabase-backed production features.
+MuseHub is MuseMallow's creator-centric community platform. It is a personal creator hub with Patreon-inspired memberships, creator updates, multimedia posts, member comments, profile identity, events, store drops, and Supabase-backed production features.
 
 ## Product Direction
 
@@ -27,9 +27,9 @@ MuseHub is MuseMallow's creator-centric community platform. It is a personal cre
 - React
 - TypeScript
 - Tailwind CSS
-- Local mock data and local draft storage
-- Planned Supabase backend
-- Planned Vercel deployment
+- Local draft storage
+- Supabase backend
+- Vercel deployment
 
 ## Planned Backend
 

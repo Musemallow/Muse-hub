@@ -88,12 +88,14 @@ function EditProfileForm({
                 value={formData.displayName}
                 onChange={(value) => updateField("displayName", value)}
                 placeholder="MuseMallow"
+                maxLength={80}
               />
               <ProfileField
                 label="Username"
                 value={formData.username}
                 onChange={(value) => updateField("username", value)}
                 placeholder="musemallow"
+                maxLength={32}
               />
             </div>
 
@@ -102,6 +104,7 @@ function EditProfileForm({
               value={formData.status}
               onChange={(value) => updateField("status", value)}
               placeholder="Local forest spirit, definitely not a cryptid."
+              maxLength={160}
             />
 
             <label className="block">
@@ -111,6 +114,7 @@ function EditProfileForm({
               <textarea
                 value={formData.bio}
                 onChange={(event) => updateField("bio", event.target.value)}
+                maxLength={1000}
                 rows={5}
                 className="w-full rounded-[8px] border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition placeholder:text-zinc-500 focus:border-blue-400/40"
                 placeholder="Write something about yourself..."
@@ -122,6 +126,7 @@ function EditProfileForm({
               value={formData.socialHandle ?? ""}
               onChange={(value) => updateField("socialHandle", value)}
               placeholder="musemallow"
+              maxLength={80}
             />
 
             <label className="block">
@@ -175,11 +180,13 @@ function ProfileField({
   value,
   onChange,
   placeholder,
+  maxLength,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
+  maxLength?: number;
 }) {
   return (
     <label className="block">
@@ -189,6 +196,7 @@ function ProfileField({
       <input
         type="text"
         value={value}
+        maxLength={maxLength}
         onChange={(event) => onChange(event.target.value)}
         className="w-full rounded-[8px] border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition placeholder:text-zinc-500 focus:border-blue-400/40"
         placeholder={placeholder}
