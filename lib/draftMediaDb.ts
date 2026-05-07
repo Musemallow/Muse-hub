@@ -51,7 +51,7 @@ export function clearDraftPosts() {
 }
 
 /**
- * Async aliases so your current FeedPage import style keeps working
+ * Async aliases so the creator post view can share the same storage helpers.
  */
 export async function getDraftPostsFromDb(): Promise<DraftPost[]> {
   return getDraftPosts();

@@ -1,26 +1,4 @@
-export type Profile = {
-  id: string;
-  username: string;
-  displayName: string;
-  status: string;
-  bio: string;
-  discord?: string;
-  avatarUrl: string;
-  bannerUrl: string;
-  themeMode: "nox" | "sol";
-  points: number;
-  isCreator: boolean;
-  stats: {
-    posts: number;
-    clips: number;
-    supporters: number;
-  };
-  schedule: {
-    day: string;
-    time: string;
-    label: string;
-  }[];
-};
+import { Profile } from "../types/profile";
 
 export const mockProfile: Profile = {
   id: "muse-001",
@@ -28,12 +6,18 @@ export const mockProfile: Profile = {
   displayName: "MuseMallow",
   status: "Local forest spirit, definitely not a cryptid.",
   bio: "Cyber Grunge Forest Spirit VTuber. Streams, art, chaos, and whispered transmissions from somewhere deep in the woods. Welcome to The Forest.",
-  discord: "musemallow",
-  avatarUrl: "/images/profile-avatar.png",
-  bannerUrl: "/images/profile-banner.png",
+  socialHandle: "musemallow",
+  avatarUrl: "/images/profile-avatar.svg",
+  bannerUrl: "/images/musemallow-banner.jpeg",
   themeMode: "nox",
   points: 1460,
   isCreator: true,
+  membership: {
+    tier: "premium",
+    memberSince: "April 2026",
+    renewalDate: "May 30, 2026",
+    cardId: "MUSE-001",
+  },
   stats: {
     posts: 28,
     clips: 12,

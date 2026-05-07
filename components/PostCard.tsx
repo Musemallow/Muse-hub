@@ -1,10 +1,13 @@
+import Image from "next/image";
 import { Post } from "../types/post";
+import { ProfilePermissions } from "../types/profile";
 
 type Props = {
   post: Post;
   onPublish?: (post: Post) => void;
   onDeleteDraft?: (postId: string) => void;
   isBusy?: boolean;
+  permissions?: ProfilePermissions;
 };
 
 export default function PostCard({
@@ -12,7 +15,10 @@ export default function PostCard({
   onPublish,
   onDeleteDraft,
   isBusy = false,
+  permissions,
 }: Props) {
+  const canComment = permissions?.canComment ?? false;
+
   return (
     <div
       style={{
@@ -38,7 +44,7 @@ export default function PostCard({
         }}
       >
         <div>
-          <strong>{post.authorName}</strong> • {post.createdAt}
+          <strong>{post.authorName}</strong> - {post.createdAt}
         </div>
 
         {post.isDraft && (
@@ -73,16 +79,27 @@ export default function PostCard({
       {post.images.length > 0 && (
         <div style={{ marginTop: 10 }}>
           {post.images.map((img) => (
-            <img
+            <div
               key={img.id}
-              src={img.uri}
-              alt="Post image"
               style={{
+                position: "relative",
                 width: "100%",
+                minHeight: 260,
+                aspectRatio: "4 / 3",
                 borderRadius: 12,
+                overflow: "hidden",
                 marginBottom: 8,
               }}
-            />
+            >
+              <Image
+                src={img.uri}
+                alt="Post image"
+                fill
+                unoptimized
+                sizes="(max-width: 800px) 100vw, 760px"
+                style={{ objectFit: "cover" }}
+              />
+            </div>
           ))}
         </div>
       )}
@@ -142,7 +159,7 @@ export default function PostCard({
               ) : null}
 
               <div>
-                🎧 {aud.title || "Audio"} ({aud.duration || "--:--"})
+                Audio: {aud.title || "Audio"} ({aud.duration || "--:--"})
               </div>
             </div>
           ))}
@@ -156,8 +173,67 @@ export default function PostCard({
           opacity: 0.7,
         }}
       >
-        ♥ {post.likeCount} • 💬 {post.commentCount}
+        Likes {post.likeCount} - Comments {post.commentCount}
       </div>
+
+      {canComment && (
+        <div
+          style={{
+            marginTop: 14,
+            borderTop: "1px solid rgba(255,255,255,0.08)",
+            paddingTop: 14,
+          }}
+        >
+          <label
+            style={{
+              display: "block",
+              fontSize: 12,
+              marginBottom: 8,
+              color: "rgba(255,255,255,0.62)",
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+            }}
+          >
+            Comment
+          </label>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: 8,
+            }}
+          >
+            <input
+              type="text"
+              placeholder="Add a comment"
+              style={{
+                flex: "1 1 220px",
+                minWidth: 0,
+                borderRadius: 12,
+                border: "1px solid rgba(255,255,255,0.08)",
+                background: "rgba(255,255,255,0.04)",
+                color: "#fff",
+                outline: "none",
+                padding: "10px 12px",
+              }}
+            />
+
+            {permissions?.canCommentWithGifs && (
+              <button type="button" style={commentToolButtonStyle}>
+                GIF
+              </button>
+            )}
+
+            {permissions?.canCommentWithImages && (
+              <button type="button" style={commentToolButtonStyle}>
+                Image
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {post.isDraft && (
         <div
@@ -208,3 +284,14 @@ export default function PostCard({
     </div>
   );
 }
+
+const commentToolButtonStyle: React.CSSProperties = {
+  borderRadius: "12px",
+  border: "1px solid rgba(80, 140, 255, 0.22)",
+  background: "rgba(80, 140, 255, 0.1)",
+  color: "#dbeafe",
+  cursor: "pointer",
+  fontSize: "13px",
+  fontWeight: 600,
+  padding: "10px 12px",
+};

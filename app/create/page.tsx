@@ -1,8 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { mockProfile } from "../../data/mockProfile";
 import { addDraftPost } from "../../lib/draftMediaDb";
+import { getProfilePermissions } from "../../lib/profilePermissions";
 import { DraftMediaFile, DraftPost } from "../../types/createPost";
 
 type LocalImage = {
@@ -32,6 +35,7 @@ const MAX_VIDEO_SIZE = 200 * 1024 * 1024;
 const MAX_AUDIO_SIZE = 50 * 1024 * 1024;
 
 export default function CreatePage() {
+  const viewerPermissions = getProfilePermissions(mockProfile);
   const [caption, setCaption] = useState("");
   const [images, setImages] = useState<LocalImage[]>([]);
   const [videos, setVideos] = useState<LocalVideo[]>([]);
@@ -56,6 +60,55 @@ export default function CreatePage() {
       audios.forEach((item) => URL.revokeObjectURL(item.previewUrl));
     };
   }, [images, videos, audios]);
+
+  if (!viewerPermissions.canPost) {
+    return (
+      <main
+        style={{
+          minHeight: "100vh",
+          background: "#000",
+          color: "#fff",
+          padding: "28px 16px",
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <div style={{ width: "100%", maxWidth: "760px" }}>
+          <Link
+            href="/hub"
+            style={{
+              display: "inline-flex",
+              marginBottom: 20,
+              padding: "10px 14px",
+              borderRadius: "12px",
+              border: "1px solid rgba(80, 140, 255, 0.18)",
+              background: "#0b0b0f",
+              color: "#fff",
+              fontSize: "14px",
+              textDecoration: "none",
+            }}
+          >
+            Back to Hub
+          </Link>
+
+          <section
+            style={{
+              background: "#0b0b0f",
+              border: "1px solid rgba(80, 140, 255, 0.14)",
+              borderRadius: 18,
+              padding: 18,
+              boxShadow: "0 0 24px rgba(0, 80, 255, 0.08)",
+            }}
+          >
+            <h1 style={{ margin: 0, fontSize: 24 }}>Creator Access</h1>
+            <p style={{ margin: "10px 0 0 0", color: "rgba(255,255,255,0.72)" }}>
+              Posting tools are available only to the profile owner.
+            </p>
+          </section>
+        </div>
+      </main>
+    );
+  }
 
   function makeId() {
     return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -346,7 +399,7 @@ export default function CreatePage() {
           </div>
 
           <Link
-            href="/feed"
+            href="/hub"
             style={{
               padding: "10px 14px",
               borderRadius: "12px",
@@ -356,7 +409,7 @@ export default function CreatePage() {
               fontSize: "14px",
             }}
           >
-            Back to Feed
+            Back to Hub
           </Link>
         </div>
 
@@ -501,17 +554,25 @@ export default function CreatePage() {
                 >
                   {images.map((image) => (
                     <div key={image.id} style={previewCardStyle}>
-                      <img
-                        src={image.previewUrl}
-                        alt={image.file.name}
+                      <div
                         style={{
+                          position: "relative",
                           width: "100%",
                           height: "180px",
-                          objectFit: "cover",
                           borderRadius: "12px",
+                          overflow: "hidden",
                           marginBottom: "10px",
                         }}
-                      />
+                      >
+                        <Image
+                          src={image.previewUrl}
+                          alt={image.file.name}
+                          fill
+                          unoptimized
+                          sizes="(max-width: 640px) 100vw, 180px"
+                          style={{ objectFit: "cover" }}
+                        />
+                      </div>
                       <div
                         style={{
                           fontSize: "13px",

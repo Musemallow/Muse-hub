@@ -3,6 +3,33 @@
 :root {
   --background: #000000;
   --foreground: #ffffff;
+  --mh-bg: #020309;
+  --mh-bg-strong: #000000;
+  --mh-panel: #050811;
+  --mh-panel-soft: rgba(255, 255, 255, 0.04);
+  --mh-text: #ffffff;
+  --mh-muted: #a1a1aa;
+  --mh-faint: #71717a;
+  --mh-border: rgba(96, 165, 250, 0.18);
+  --mh-border-soft: rgba(255, 255, 255, 0.10);
+  --mh-blue: #60a5fa;
+  --mh-blue-soft: rgba(37, 99, 235, 0.14);
+}
+
+html[data-theme="sol"] {
+  --background: #f6f8fc;
+  --foreground: #0b1020;
+  --mh-bg: #f6f8fc;
+  --mh-bg-strong: #ffffff;
+  --mh-panel: #ffffff;
+  --mh-panel-soft: rgba(37, 99, 235, 0.06);
+  --mh-text: #0b1020;
+  --mh-muted: #4b5563;
+  --mh-faint: #64748b;
+  --mh-border: rgba(37, 99, 235, 0.20);
+  --mh-border-soft: rgba(15, 23, 42, 0.12);
+  --mh-blue: #1d4ed8;
+  --mh-blue-soft: rgba(37, 99, 235, 0.10);
 }
 
 html,
@@ -17,6 +44,9 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition:
+    background 180ms ease,
+    color 180ms ease;
 }
 
 * {
@@ -26,4 +56,221 @@ body {
 img {
   display: block;
   max-width: 100%;
+}
+
+.hub-nav-link {
+  border: 1px solid var(--mh-border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--mh-panel) 58%, transparent);
+  color: color-mix(in srgb, var(--mh-text) 86%, transparent);
+  display: inline-flex;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.55rem 0.75rem;
+  text-decoration: none;
+  transition:
+    border-color 180ms ease,
+    color 180ms ease,
+    background 180ms ease;
+}
+
+@media (min-width: 640px) {
+  .hub-nav-link {
+    font-size: 0.875rem;
+    padding: 0.625rem 0.875rem;
+  }
+}
+
+.hub-nav-link:hover {
+  border-color: color-mix(in srgb, var(--mh-blue) 56%, transparent);
+  background: var(--mh-blue-soft);
+  color: var(--mh-text);
+}
+
+.theme-toggle {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 80;
+  display: inline-flex;
+  gap: 0.25rem;
+  border: 1px solid var(--mh-border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--mh-panel) 86%, transparent);
+  padding: 0.25rem;
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(14px);
+}
+
+.theme-toggle button {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--mh-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.5rem 0.7rem;
+  text-transform: uppercase;
+}
+
+.theme-toggle button.is-active {
+  background: var(--mh-blue-soft);
+  color: var(--mh-blue);
+}
+
+html[data-theme="sol"] .bg-black,
+html[data-theme="sol"] .bg-\[\#020309\] {
+  background-color: var(--mh-bg) !important;
+}
+
+html[data-theme="sol"] main {
+  background:
+    radial-gradient(circle at top, rgba(37, 99, 235, 0.10), transparent 26%),
+    linear-gradient(to bottom, #f8fbff, #eef3fb) !important;
+  color: var(--mh-text) !important;
+}
+
+html[data-theme="sol"] [class*="bg-black"],
+html[data-theme="sol"] [class*="bg-[#020309"],
+html[data-theme="sol"] [class*="bg-[#03050d"],
+html[data-theme="sol"] [class*="bg-[#050811"],
+html[data-theme="sol"] [class*="bg-[#07101d"],
+html[data-theme="sol"] [class*="bg-[#0b1020"] {
+  background-color: var(--mh-panel) !important;
+}
+
+html[data-theme="sol"] [class*="bg-white/"],
+html[data-theme="sol"] [class*="bg-blue-500/"] {
+  background-color: var(--mh-panel-soft) !important;
+}
+
+html[data-theme="sol"] section,
+html[data-theme="sol"] article,
+html[data-theme="sol"] aside,
+html[data-theme="sol"] nav,
+html[data-theme="sol"] footer,
+html[data-theme="sol"] header {
+  color: var(--mh-text);
+}
+
+html[data-theme="sol"] .bg-\[\#03050d\],
+html[data-theme="sol"] .bg-\[\#050811\],
+html[data-theme="sol"] .bg-\[\#050811\]\/90 {
+  background-color: var(--mh-panel) !important;
+}
+
+html[data-theme="sol"] .bg-black\/25,
+html[data-theme="sol"] .bg-black\/30,
+html[data-theme="sol"] .bg-black\/35,
+html[data-theme="sol"] .bg-black\/40,
+html[data-theme="sol"] .bg-black\/45,
+html[data-theme="sol"] .bg-black\/60,
+html[data-theme="sol"] .bg-black\/70,
+html[data-theme="sol"] .bg-white\/\[0\.035\],
+html[data-theme="sol"] .bg-white\/\[0\.04\],
+html[data-theme="sol"] .bg-white\/\[0\.055\],
+html[data-theme="sol"] .bg-white\/\[0\.06\],
+html[data-theme="sol"] .bg-blue-500\/10,
+html[data-theme="sol"] .bg-blue-500\/15 {
+  background-color: var(--mh-panel-soft) !important;
+}
+
+html[data-theme="sol"] .text-white,
+html[data-theme="sol"] .text-zinc-200,
+html[data-theme="sol"] .text-zinc-300 {
+  color: var(--mh-text) !important;
+}
+
+html[data-theme="sol"] [class*="text-white"],
+html[data-theme="sol"] [class*="text-zinc-200"],
+html[data-theme="sol"] [class*="text-zinc-300"] {
+  color: var(--mh-text) !important;
+}
+
+html[data-theme="sol"] .text-zinc-400,
+html[data-theme="sol"] .text-zinc-500,
+html[data-theme="sol"] .text-zinc-600 {
+  color: var(--mh-muted) !important;
+}
+
+html[data-theme="sol"] [class*="text-zinc-400"],
+html[data-theme="sol"] [class*="text-zinc-500"],
+html[data-theme="sol"] [class*="text-zinc-600"] {
+  color: var(--mh-muted) !important;
+}
+
+html[data-theme="sol"] .text-blue-100,
+html[data-theme="sol"] .text-blue-200,
+html[data-theme="sol"] .text-blue-300,
+html[data-theme="sol"] .text-blue-200\/75,
+html[data-theme="sol"] .text-blue-200\/80,
+html[data-theme="sol"] .text-blue-300\/75 {
+  color: var(--mh-blue) !important;
+}
+
+html[data-theme="sol"] [class*="text-blue-"] {
+  color: var(--mh-blue) !important;
+}
+
+html[data-theme="sol"] .border-white\/10,
+html[data-theme="sol"] .border-white\/15,
+html[data-theme="sol"] .border-blue-400\/15,
+html[data-theme="sol"] .border-blue-400\/20,
+html[data-theme="sol"] .border-blue-400\/25,
+html[data-theme="sol"] .border-blue-400\/30,
+html[data-theme="sol"] .border-blue-400\/35,
+html[data-theme="sol"] .border-blue-400\/40,
+html[data-theme="sol"] .border-blue-400\/45 {
+  border-color: var(--mh-border) !important;
+}
+
+html[data-theme="sol"] [class*="border-white/"],
+html[data-theme="sol"] [class*="border-blue-"] {
+  border-color: var(--mh-border) !important;
+}
+
+html[data-theme="sol"] .hub-hero-overlay {
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(248, 251, 255, 0.08),
+      rgba(248, 251, 255, 0.74) 62%,
+      #f8fbff 100%
+    ) !important;
+}
+
+html[data-theme="sol"] .profile-hero-overlay {
+  background:
+    linear-gradient(
+      to top,
+      rgba(248, 251, 255, 0.94),
+      rgba(248, 251, 255, 0.50) 60%,
+      rgba(248, 251, 255, 0.08)
+    ) !important;
+}
+
+html[data-theme="sol"] .media-card-overlay {
+  background:
+    linear-gradient(
+      to top,
+      rgba(248, 251, 255, 0.86),
+      rgba(248, 251, 255, 0.08) 64%
+    ) !important;
+}
+
+html[data-theme="sol"] input,
+html[data-theme="sol"] textarea,
+html[data-theme="sol"] select {
+  background: #ffffff !important;
+  color: var(--mh-text) !important;
+}
+
+html[data-theme="sol"] .shadow-\[0_18px_45px_rgba\(0\,0\,0\,0\.35\)\],
+html[data-theme="sol"] .shadow-\[0_18px_45px_rgba\(0\,0\,0\,0\.28\)\],
+html[data-theme="sol"] .shadow-\[0_18px_38px_rgba\(0\,0\,0\,0\.22\)\],
+html[data-theme="sol"] .shadow-\[0_18px_38px_rgba\(0\,0\,0\,0\.2\)\] {
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.08) !important;
 }

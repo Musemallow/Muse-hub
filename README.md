@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MuseHub
+
+MuseHub is a Next.js creator/community prototype for MuseMallow. It currently uses mock data and browser-local storage while the app shell, profile system, discussions, store previews, and Nox/Sol theme modes are being shaped before the Supabase backend pass.
+
+## Routes
+
+- `/` - animated boot entrance screen
+- `/hub` - main landing hub with latest posts, schedule preview, store drops, and latest channel preview
+- `/events` - schedule page
+- `/discussions` - Signal Rooms discussion prototype
+- `/store` - external-link storefront preview
+- `/profile` - owner profile and editable profile surface
+- `/profile/[username]` - mock member profile pages
+- `/profiles` - mock profile directory
+- `/login` - login-first member access page
+- `/join` - redirects to `/login`
+- `/join/create` - frontend account creation/profile preview with validation checks
+- `/feed` - owner/local post view kept for prototype tooling
+- `/create` - owner-only local post composer with media previews
 
 ## Getting Started
 
-First, run the development server:
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Checks
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint
+npm run build
+```
 
-## Learn More
+Draft and published post data are stored in the browser for local development. Supabase is not connected yet; `lib/supabase.ts` exposes a guarded client helper for the future backend pass.
 
-To learn more about Next.js, take a look at the following resources:
+## Supabase
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The frontend auth forms read:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+```
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Initial database setup lives in `supabase/schema.sql`. Run it in the Supabase SQL editor before relying on real profile persistence or username uniqueness.
