@@ -1,4 +1,5 @@
-import { Profile, ThemeMode } from "../types/profile";
+import { Profile, SocialLinks, ThemeMode } from "../types/profile";
+import { Json } from "../types/database";
 import { getSupabaseClient } from "./supabase";
 
 type ProfileRow = {
@@ -8,6 +9,9 @@ type ProfileRow = {
   bio: string | null;
   status: string | null;
   social_handle: string | null;
+  social_links: Json;
+  birthdate: string | null;
+  show_birthdate: boolean | null;
   avatar_url: string | null;
   banner_url: string | null;
   role: "owner" | "moderator" | "member";
@@ -17,13 +21,14 @@ type ProfileRow = {
   created_at: string;
 };
 
+const profileSelect =
+  "id, username, display_name, bio, status, social_handle, social_links, birthdate, show_birthdate, avatar_url, banner_url, role, membership_tier, theme_mode, points, created_at";
+
 export async function getProfilesFromSupabase(): Promise<Profile[]> {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
     .from("profiles")
-    .select(
-      "id, username, display_name, bio, status, social_handle, avatar_url, banner_url, role, membership_tier, theme_mode, points, created_at"
-    )
+    .select(profileSelect)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -37,9 +42,7 @@ export async function getProfileByUsernameFromSupabase(username: string) {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
     .from("profiles")
-    .select(
-      "id, username, display_name, bio, status, social_handle, avatar_url, banner_url, role, membership_tier, theme_mode, points, created_at"
-    )
+    .select(profileSelect)
     .eq("username", username)
     .maybeSingle();
 
@@ -65,9 +68,7 @@ export async function getCurrentProfileFromSupabase() {
 
   const { data, error } = await supabase
     .from("profiles")
-    .select(
-      "id, username, display_name, bio, status, social_handle, avatar_url, banner_url, role, membership_tier, theme_mode, points, created_at"
-    )
+    .select(profileSelect)
     .eq("id", user.id)
     .maybeSingle();
 
@@ -78,6 +79,35 @@ export async function getCurrentProfileFromSupabase() {
   return data ? mapProfileRow(data) : null;
 }
 
+export async function updateCurrentProfileInSupabase(profile: Profile) {
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase
+    .from("profiles")
+    .update({
+      username: profile.username,
+      display_name: profile.displayName,
+      bio: profile.bio,
+      status: profile.status,
+      social_handle: profile.socialHandle ?? "",
+      social_links: profile.socialLinks ?? {},
+      birthdate: profile.birthdate || null,
+      show_birthdate: Boolean(profile.showBirthdate),
+      avatar_url: profile.avatarUrl,
+      banner_url: profile.bannerUrl,
+      theme_mode: profile.themeMode,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", profile.id)
+    .select(profileSelect)
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return mapProfileRow(data);
+}
+
 function mapProfileRow(row: ProfileRow): Profile {
   return {
     id: row.id,
@@ -86,6 +116,9 @@ function mapProfileRow(row: ProfileRow): Profile {
     status: row.status ?? "New signal detected.",
     bio: row.bio ?? "",
     socialHandle: row.social_handle ?? "",
+    socialLinks: parseSocialLinks(row.social_links),
+    birthdate: row.birthdate ?? "",
+    showBirthdate: Boolean(row.show_birthdate),
     avatarUrl: row.avatar_url ?? "/images/profile-avatar.svg",
     bannerUrl: row.banner_url ?? "/images/profile-banner-placeholder.svg",
     themeMode: row.theme_mode ?? "nox",
@@ -110,4 +143,27 @@ function formatJoinDate(value: string) {
     month: "short",
     year: "numeric",
   }).format(new Date(value));
+}
+
+function parseSocialLinks(value: Json): SocialLinks {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return {};
+  }
+
+  return {
+    twitch: getStringField(value, "twitch"),
+    x: getStringField(value, "x"),
+    bsky: getStringField(value, "bsky"),
+    instagram: getStringField(value, "instagram"),
+    youtube: getStringField(value, "youtube"),
+    discord: getStringField(value, "discord"),
+  };
+}
+
+function getStringField(
+  value: { [key: string]: Json | undefined },
+  key: string
+) {
+  const field = value[key];
+  return typeof field === "string" ? field : "";
 }

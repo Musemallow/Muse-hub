@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { Profile } from "../../types/profile";
 
 type ProfileHeaderProps = {
@@ -13,12 +12,11 @@ export default function ProfileHeader({
   return (
     <section className="overflow-hidden rounded-[8px] border border-blue-400/15 bg-black/45 shadow-[0_18px_45px_rgba(0,0,0,0.28)] backdrop-blur-md">
       <div className="relative h-48 w-full sm:h-60 md:h-72">
-        <Image
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src={profile.bannerUrl}
           alt={`${profile.displayName} banner`}
-          fill
-          className="object-cover object-[50%_38%]"
-          priority
+          className="h-full w-full object-cover object-[50%_38%]"
         />
         <div className="profile-hero-overlay absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.86),rgba(0,0,0,0.35)_58%,transparent)]" />
       </div>
@@ -28,11 +26,11 @@ export default function ProfileHeader({
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
               <div className="relative h-28 w-28 overflow-hidden rounded-[8px] border border-blue-300/55 bg-zinc-950 shadow-[0_0_24px_rgba(37,99,235,0.2)] sm:h-32 sm:w-32 md:h-40 md:w-40">
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={profile.avatarUrl}
                   alt={`${profile.displayName} avatar`}
-                  fill
-                  className="object-cover"
+                  className="h-full w-full object-cover"
                 />
               </div>
 

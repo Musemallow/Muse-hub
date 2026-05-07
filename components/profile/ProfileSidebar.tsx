@@ -19,9 +19,11 @@ export default function ProfileSidebar({ profile }: ProfileSidebarProps) {
         <div className="space-y-3 text-sm text-zinc-300">
           <ProfileDetail label="MuseHub ID" value={`@${profile.username}`} />
 
-          {profile.socialHandle && (
-            <ProfileDetail label="Social" value={profile.socialHandle} />
+          {profile.showBirthdate && profile.birthdate && (
+            <ProfileDetail label="Birthdate" value={formatBirthdate(profile.birthdate)} />
           )}
+
+          <SocialLinks profile={profile} />
 
           <ProfileDetail label="Points" value={String(profile.points)} />
         </div>
@@ -79,4 +81,67 @@ function ProfileDetail({ label, value }: { label: string; value: string }) {
       <p className="mt-1 text-white">{value}</p>
     </div>
   );
+}
+
+function SocialLinks({ profile }: { profile: Profile }) {
+  const links = profile.socialLinks ?? {};
+  const socialItems = [
+    { label: "Twitch", value: links.twitch, href: toSocialUrl("twitch", links.twitch) },
+    { label: "X", value: links.x, href: toSocialUrl("x", links.x) },
+    { label: "BSKY", value: links.bsky, href: toSocialUrl("bsky", links.bsky) },
+    { label: "Instagram", value: links.instagram, href: toSocialUrl("instagram", links.instagram) },
+    { label: "YouTube", value: links.youtube, href: toSocialUrl("youtube", links.youtube) },
+  ].filter((item) => item.value);
+
+  return (
+    <>
+      {socialItems.map((item) => (
+        <div key={item.label}>
+          <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
+            {item.label}
+          </p>
+          <a
+            href={item.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-1 inline-flex text-blue-100 transition hover:text-white"
+          >
+            {item.label}
+          </a>
+        </div>
+      ))}
+
+      {links.discord && (
+        <ProfileDetail label="Discord" value={links.discord} />
+      )}
+    </>
+  );
+}
+
+function toSocialUrl(platform: string, value = "") {
+  const cleanValue = value.trim();
+  if (cleanValue.startsWith("http://") || cleanValue.startsWith("https://")) {
+    return cleanValue;
+  }
+
+  const handle = cleanValue.replace(/^@/, "");
+
+  if (platform === "twitch") return `https://twitch.tv/${handle}`;
+  if (platform === "x") return `https://x.com/${handle}`;
+  if (platform === "bsky") return `https://bsky.app/profile/${handle}`;
+  if (platform === "instagram") return `https://instagram.com/${handle}`;
+  if (platform === "youtube") {
+    return cleanValue.startsWith("@")
+      ? `https://youtube.com/${cleanValue}`
+      : `https://youtube.com/@${handle}`;
+  }
+
+  return cleanValue;
+}
+
+function formatBirthdate(value: string) {
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+  }).format(new Date(`${value}T00:00:00`));
 }

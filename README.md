@@ -55,3 +55,5 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 Initial database setup lives in `supabase/schema.sql`. Run it in the Supabase SQL editor before relying on real profile persistence or username uniqueness.
 
 After creating the owner account through `/join/create`, use `supabase/make-owner.sql` in the Supabase SQL editor to promote that account to `owner`.
+
+Profile media buckets and upload policies live in `supabase/storage.sql`.

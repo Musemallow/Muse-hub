@@ -12,6 +12,9 @@ create table public.profiles (
   bio text not null default '',
   status text not null default 'New signal detected.',
   social_handle text,
+  social_links jsonb not null default '{}'::jsonb,
+  birthdate date,
+  show_birthdate boolean not null default false,
   avatar_url text not null default '/images/profile-avatar.svg',
   banner_url text not null default '/images/profile-banner-placeholder.svg',
   role public.profile_role not null default 'member',
@@ -24,7 +27,8 @@ create table public.profiles (
   constraint display_name_length check (char_length(display_name) between 1 and 80),
   constraint status_length check (char_length(status) <= 160),
   constraint bio_length check (char_length(bio) <= 1000),
-  constraint social_handle_length check (social_handle is null or char_length(social_handle) <= 80)
+  constraint social_handle_length check (social_handle is null or char_length(social_handle) <= 80),
+  constraint social_links_is_object check (jsonb_typeof(social_links) = 'object')
 );
 
 alter table public.profiles enable row level security;
@@ -37,6 +41,9 @@ grant update (
   bio,
   status,
   social_handle,
+  social_links,
+  birthdate,
+  show_birthdate,
   avatar_url,
   banner_url,
   theme_mode,
@@ -68,6 +75,9 @@ begin
     bio,
     status,
     social_handle,
+    social_links,
+    birthdate,
+    show_birthdate,
     theme_mode
   )
   values (
@@ -77,6 +87,9 @@ begin
     coalesce(new.raw_user_meta_data ->> 'bio', ''),
     coalesce(new.raw_user_meta_data ->> 'status', 'New signal detected.'),
     nullif(new.raw_user_meta_data ->> 'social_handle', ''),
+    '{}'::jsonb,
+    nullif(new.raw_user_meta_data ->> 'birthdate', '')::date,
+    false,
     coalesce((new.raw_user_meta_data ->> 'theme_mode')::public.theme_mode, 'nox')
   );
 

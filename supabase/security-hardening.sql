@@ -7,12 +7,21 @@ drop policy if exists "Members can update their own editable profile fields" on 
 
 revoke insert, update, delete on public.profiles from anon, authenticated;
 grant select on public.profiles to anon, authenticated;
+
+alter table public.profiles
+  add column if not exists social_links jsonb not null default '{}'::jsonb,
+  add column if not exists birthdate date,
+  add column if not exists show_birthdate boolean not null default false;
+
 grant update (
   username,
   display_name,
   bio,
   status,
   social_handle,
+  social_links,
+  birthdate,
+  show_birthdate,
   avatar_url,
   banner_url,
   theme_mode,
@@ -34,6 +43,10 @@ alter table public.profiles
 alter table public.profiles
   drop constraint if exists social_handle_length,
   add constraint social_handle_length check (social_handle is null or char_length(social_handle) <= 80);
+
+alter table public.profiles
+  drop constraint if exists social_links_is_object,
+  add constraint social_links_is_object check (jsonb_typeof(social_links) = 'object');
 
 create policy "Members can update their own editable profile fields"
   on public.profiles

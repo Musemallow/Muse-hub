@@ -9,6 +9,15 @@ export type Membership = {
   cardId: string;
 };
 
+export type SocialLinks = {
+  twitch?: string;
+  x?: string;
+  bsky?: string;
+  instagram?: string;
+  youtube?: string;
+  discord?: string;
+};
+
 export type ProfilePermissions = {
   canPost: boolean;
   canMessage: boolean;
@@ -24,6 +33,9 @@ export type Profile = {
   status: string;
   bio: string;
   socialHandle?: string;
+  socialLinks?: SocialLinks;
+  birthdate?: string;
+  showBirthdate?: boolean;
   avatarUrl: string;
   bannerUrl: string;
   themeMode: ThemeMode;

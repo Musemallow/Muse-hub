@@ -4,13 +4,17 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import EditProfileModal from "../../components/profile/EditProfileModal";
 import ProfileView from "../../components/profile/ProfileView";
-import { getCurrentProfileFromSupabase } from "../../lib/profiles";
+import {
+  getCurrentProfileFromSupabase,
+  updateCurrentProfileInSupabase,
+} from "../../lib/profiles";
 import { Profile } from "../../types/profile";
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -40,8 +44,16 @@ export default function ProfilePage() {
     };
   }, []);
 
-  function handleSaveProfile(updatedProfile: Profile) {
-    setProfile(updatedProfile);
+  async function handleSaveProfile(updatedProfile: Profile) {
+    setSaveError("");
+
+    try {
+      const savedProfile = await updateCurrentProfileInSupabase(updatedProfile);
+      setProfile(savedProfile);
+    } catch {
+      setSaveError("Unable to save profile changes right now.");
+      setProfile(updatedProfile);
+    }
   }
 
   if (isLoading) {
@@ -61,6 +73,12 @@ export default function ProfilePage() {
   return (
     <>
       <ProfileView profile={profile} onEdit={() => setIsEditOpen(true)} />
+
+      {saveError && (
+        <div className="fixed bottom-5 left-1/2 z-40 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 rounded-[8px] border border-red-400/40 bg-red-500/15 px-4 py-3 text-sm text-red-100 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
+          {saveError}
+        </div>
+      )}
 
       <EditProfileModal
         isOpen={isEditOpen}
