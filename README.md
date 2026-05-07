@@ -15,7 +15,7 @@ MuseHub is a Next.js creator/community prototype for MuseMallow. It currently us
 - `/login` - login-first member access page
 - `/join` - redirects to `/login`
 - `/join/create` - frontend account creation/profile preview with validation checks
-- `/feed` - owner/local post view kept for prototype tooling
+- `/feed` - redirects to `/hub#latest-posts`
 - `/create` - owner-only local post composer with media previews
 
 ## Getting Started
