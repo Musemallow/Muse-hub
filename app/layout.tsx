@@ -6,6 +6,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "MuseHub",
   description: "Welcome to The Forest",
+  icons: {
+    icon: [{ url: "/icon.png", type: "image/png" }],
+    apple: [{ url: "/apple-icon.png", type: "image/png" }],
+  },
 };
 
 export default function RootLayout({
