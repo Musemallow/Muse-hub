@@ -45,6 +45,9 @@ export default function CreateAccountPage() {
   const [statusMessage, setStatusMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const normalizedUsername = normalizeUsername(username);
   const normalizedEmail = email.trim().toLowerCase();
@@ -84,10 +87,11 @@ export default function CreateAccountPage() {
 
     try {
       const supabase = getSupabaseClient();
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: normalizedEmail,
         password,
         options: {
+          emailRedirectTo: `${window.location.origin}/profile`,
           data: {
             username: normalizedUsername,
             display_name: displayName.trim(),
@@ -100,22 +104,63 @@ export default function CreateAccountPage() {
       });
 
       if (error) {
-        setErrorMessage(error.message);
+        setErrorMessage(getFriendlyAuthError(error.message));
         return;
       }
 
+      if (data.session) {
+        setStatusMessage("Account created. Welcome to The Forest.");
+        router.push("/profile");
+        return;
+      }
+
+      setPendingEmail(normalizedEmail);
       setStatusMessage(
-        "Account created. Check your email if Supabase asks for confirmation, then log in."
+        "Account created. Check your email for the verification code, then enter it below."
       );
       router.refresh();
     } catch (error) {
       setErrorMessage(
         error instanceof Error
-          ? error.message
-          : "Unable to create the account right now. Check Supabase configuration."
+          ? getFriendlyAuthError(error.message)
+          : "Unable to create the account right now."
       );
     } finally {
       setIsSubmitting(false);
+    }
+  }
+
+  async function handleVerifyCode(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setErrorMessage("");
+    setStatusMessage("");
+
+    if (!pendingEmail || verificationCode.length !== 6) {
+      setErrorMessage("Enter the six-digit code from your email.");
+      return;
+    }
+
+    setIsVerifying(true);
+
+    try {
+      const supabase = getSupabaseClient();
+      const { error } = await supabase.auth.verifyOtp({
+        email: pendingEmail,
+        token: verificationCode,
+        type: "signup",
+      });
+
+      if (error) {
+        setErrorMessage(getFriendlyAuthError(error.message));
+        return;
+      }
+
+      setStatusMessage("Email verified. Welcome to The Forest.");
+      router.push("/profile");
+    } catch {
+      setErrorMessage("Unable to verify the code right now.");
+    } finally {
+      setIsVerifying(false);
     }
   }
 
@@ -144,8 +189,8 @@ export default function CreateAccountPage() {
                 Create Member Profile
               </h1>
               <p className="mt-3 text-sm leading-7 text-zinc-400">
-                This checks account rules on the frontend now. Supabase will
-                enforce the real email, username, and password validation later.
+                Join The Forest with a verified email, secure password, and
+                member profile.
               </p>
 
               <form
@@ -236,6 +281,40 @@ export default function CreateAccountPage() {
                   </p>
                 )}
               </form>
+
+              {pendingEmail && (
+                <form
+                  className="mt-5 rounded-[8px] border border-blue-400/20 bg-black/30 p-4"
+                  onSubmit={handleVerifyCode}
+                >
+                  <p className="text-xs uppercase tracking-[0.22em] text-blue-300/75">
+                    Email Verification
+                  </p>
+                  <p className="mt-3 text-sm leading-6 text-zinc-400">
+                    Enter the six-digit code sent to {pendingEmail}.
+                  </p>
+                  <input
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    value={verificationCode}
+                    maxLength={6}
+                    onChange={(event) =>
+                      setVerificationCode(
+                        event.target.value.replace(/\D/g, "").slice(0, 6)
+                      )
+                    }
+                    className="mt-4 w-full rounded-[8px] border border-white/10 bg-white/[0.04] px-4 py-3 text-center text-xl font-black tracking-[0.35em] text-white outline-none placeholder:text-zinc-600 focus:border-blue-400/45"
+                    placeholder="000000"
+                  />
+                  <button
+                    type="submit"
+                    disabled={verificationCode.length !== 6 || isVerifying}
+                    className="mt-4 inline-flex w-full justify-center rounded-full border border-blue-400/45 bg-blue-500/15 px-5 py-3 text-sm font-bold text-blue-100 transition enabled:hover:border-blue-200 enabled:hover:bg-blue-500/25 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.03] disabled:text-zinc-600"
+                  >
+                    {isVerifying ? "Verifying..." : "Verify Email"}
+                  </button>
+                </form>
+              )}
             </section>
 
             <div className="overflow-hidden rounded-[8px] border border-white/10">
@@ -362,4 +441,20 @@ function normalizeUsername(value: string) {
       .replace(/[^a-z0-9_-]+/g, "-")
       .replace(/^-+|-+$/g, "") || "new-wanderer"
   );
+}
+
+function getFriendlyAuthError(message: string) {
+  if (message.toLowerCase().includes("already")) {
+    return "That email or username may already be in use.";
+  }
+
+  if (message.toLowerCase().includes("invalid")) {
+    return "That verification code is not valid.";
+  }
+
+  if (message.toLowerCase().includes("expired")) {
+    return "That verification code has expired. Please request a new one.";
+  }
+
+  return message;
 }

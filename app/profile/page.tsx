@@ -11,7 +11,6 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -23,15 +22,10 @@ export default function ProfilePage() {
         if (!isMounted) return;
 
         setProfile(currentProfile);
-        setErrorMessage("");
-      } catch (error) {
+      } catch {
         if (!isMounted) return;
 
-        setErrorMessage(
-          error instanceof Error
-            ? error.message
-            : "Unable to load your profile."
-        );
+        setProfile(null);
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -57,10 +51,8 @@ export default function ProfilePage() {
   if (!profile) {
     return (
       <ProfileAccessMessage
-        body={
-          errorMessage ||
-          "Log in to view your member profile, membership card, and account details."
-        }
+        title="You're not logged in"
+        body="Log in or join The Forest to view your member profile, membership card, and account details."
         showLogin
       />
     );
@@ -82,9 +74,11 @@ export default function ProfilePage() {
 
 function ProfileAccessMessage({
   body,
+  title = "Member Access",
   showLogin = false,
 }: {
   body: string;
+  title?: string;
   showLogin?: boolean;
 }) {
   return (
@@ -107,7 +101,7 @@ function ProfileAccessMessage({
             Profile
           </p>
           <h1 className="mt-3 text-3xl font-black text-white">
-            Member Access
+            {title}
           </h1>
           <p className="mt-4 text-sm leading-7 text-zinc-400">{body}</p>
 
