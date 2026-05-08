@@ -25,7 +25,7 @@ export function saveDraftPosts(posts: DraftPost[]) {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
   } catch {
-    console.error("Failed to save draft posts.");
+    return;
   }
 }
 
@@ -46,7 +46,7 @@ export function clearDraftPosts() {
   try {
     window.localStorage.removeItem(STORAGE_KEY);
   } catch {
-    console.error("Failed to clear draft posts.");
+    return;
   }
 }
 

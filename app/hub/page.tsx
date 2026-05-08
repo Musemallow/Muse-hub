@@ -1,11 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
+import FeedPostCard from "../../components/FeedPostCard";
 import {
   landingUpdates,
   storeDrops,
   upcomingEvents,
 } from "../../data/landingContent";
 import { discussionCategories } from "../../data/discussionThreads";
+import { getLatestPosts } from "../../lib/posts";
 import "../entrance.css";
 
 const creatorOverview = {
@@ -14,14 +16,14 @@ const creatorOverview = {
   points: 1460,
 };
 
-export default function HubPage() {
+export default async function HubPage() {
   const latestChannel =
     discussionCategories
       .flatMap((category) => category.channels)
       .find((channel) => channel.id === "general-chat") ??
     discussionCategories[0].channels[0];
   const latestMessage = latestChannel.messages[0];
-  const latestPosts = landingUpdates.slice(0, 3);
+  const latestPosts = await getHubPosts();
 
   return (
     <main className="landing-page min-h-screen bg-[#020309] text-white">
@@ -121,28 +123,34 @@ export default function HubPage() {
           <section id="latest-posts">
             <SectionHeading eyebrow="Posts" title="Latest From MuseMallow" />
             <div className="mt-5 grid gap-4">
-              {latestPosts.map((post) => (
-                <Link
-                  key={post.id}
-                  href={post.href}
-                  className="rounded-[8px] border border-blue-400/15 bg-[#050811]/90 p-5 shadow-[0_18px_38px_rgba(0,0,0,0.22)] transition hover:border-blue-400/40 hover:bg-[#07101d]"
-                >
-                  <div className="flex flex-wrap items-center gap-3">
-                    <span className="rounded-full border border-blue-400/35 bg-blue-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-blue-100">
-                      {post.label}
-                    </span>
-                    <span className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-                      {post.date}
-                    </span>
-                  </div>
-                  <h3 className="mt-4 text-xl font-bold text-white">
-                    {post.title}
-                  </h3>
-                  <p className="mt-2 max-w-3xl text-sm leading-7 text-zinc-400">
-                    {post.summary}
-                  </p>
-                </Link>
-              ))}
+              {latestPosts.length > 0 ? (
+                latestPosts.map((post) => (
+                  <FeedPostCard key={post.id} post={post} compact />
+                ))
+              ) : (
+                landingUpdates.slice(0, 3).map((post) => (
+                  <Link
+                    key={post.id}
+                    href={post.href}
+                    className="rounded-[8px] border border-blue-400/15 bg-[#050811]/90 p-5 shadow-[0_18px_38px_rgba(0,0,0,0.22)] transition hover:border-blue-400/40 hover:bg-[#07101d]"
+                  >
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="rounded-full border border-blue-400/35 bg-blue-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-blue-100">
+                        {post.label}
+                      </span>
+                      <span className="text-xs uppercase tracking-[0.18em] text-zinc-500">
+                        {post.date}
+                      </span>
+                    </div>
+                    <h3 className="mt-4 text-xl font-bold text-white">
+                      {post.title}
+                    </h3>
+                    <p className="mt-2 max-w-3xl text-sm leading-7 text-zinc-400">
+                      {post.summary}
+                    </p>
+                  </Link>
+                ))
+              )}
             </div>
           </section>
 
@@ -261,6 +269,14 @@ export default function HubPage() {
       </section>
     </main>
   );
+}
+
+async function getHubPosts() {
+  try {
+    return await getLatestPosts(3);
+  } catch {
+    return [];
+  }
 }
 
 function HubStat({ label, value }: { label: string; value: string }) {

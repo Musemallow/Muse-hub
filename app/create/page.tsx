@@ -3,10 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
-import { addDraftPost } from "../../lib/draftMediaDb";
+import { createPublishedPost } from "../../lib/posts";
+import { uploadPostMedia } from "../../lib/postMedia";
 import { getProfilePermissions } from "../../lib/profilePermissions";
 import { getCurrentProfileFromSupabase } from "../../lib/profiles";
-import { DraftMediaFile, DraftPost } from "../../types/createPost";
 import { Profile } from "../../types/profile";
 
 type LocalImage = {
@@ -308,59 +308,34 @@ export default function CreatePage() {
     setAudios([]);
   }
 
-  function fileToDataUrl(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        if (typeof reader.result === "string") {
-          resolve(reader.result);
-        } else {
-          reject(new Error("Failed to convert file to data URL."));
-        }
-      };
-
-      reader.onerror = () => reject(reader.error);
-      reader.readAsDataURL(file);
-    });
-  }
-
-  async function mapLocalFilesToDraftMedia<T extends { file: File }>(
-    items: T[]
-  ): Promise<DraftMediaFile[]> {
-    return Promise.all(
-      items.map(async (item) => ({
-        name: item.file.name,
-        type: item.file.type,
-        size: item.file.size,
-        dataUrl: await fileToDataUrl(item.file),
-      }))
-    );
-  }
-
   async function handlePost() {
     if (!canPost) return;
 
     try {
       setIsPosting(true);
-      setStatusMessage("Saving draft...");
+      setStatusMessage("Uploading media...");
+      const uploadedImages = await Promise.all(
+        images.map((item) => uploadPostMedia(item.file, "image"))
+      );
+      const uploadedVideos = await Promise.all(
+        videos.map((item) => uploadPostMedia(item.file, "video"))
+      );
+      const uploadedAudios = await Promise.all(
+        audios.map((item) => uploadPostMedia(item.file, "audio"))
+      );
 
-      const draftPost: DraftPost = {
-        id: makeId(),
-        caption: caption.trim(),
-        images: await mapLocalFilesToDraftMedia(images),
-        videos: await mapLocalFilesToDraftMedia(videos),
-        audios: await mapLocalFilesToDraftMedia(audios),
-        createdAt: new Date().toISOString(),
-      };
-
-      addDraftPost(draftPost);
+      setStatusMessage("Publishing signal...");
+      await createPublishedPost({
+        content: caption.trim(),
+        media: [...uploadedImages, ...uploadedVideos, ...uploadedAudios],
+      });
 
       clearComposer();
-      setStatusMessage("Draft saved locally.");
+      setStatusMessage("Post published to MuseHub.");
     } catch (error) {
-      console.error(error);
-      setStatusMessage("Failed to save draft.");
+      setStatusMessage(
+        error instanceof Error ? error.message : "Failed to publish post."
+      );
     } finally {
       setIsPosting(false);
     }
@@ -729,7 +704,7 @@ export default function CreatePage() {
                 fontWeight: 600,
               }}
             >
-              {isPosting ? "Creating..." : "Create Local Draft"}
+              {isPosting ? "Publishing..." : "Publish Post"}
             </button>
           </div>
         </div>

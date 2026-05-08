@@ -149,7 +149,7 @@ export default function CreateAccountPage() {
       const { error } = await supabase.auth.verifyOtp({
         email: normalizedEmail,
         token: verificationCode,
-        type: "signup",
+        type: "email",
       });
 
       if (error) {
@@ -636,6 +636,13 @@ function getFriendlyAuthError(message: string) {
 
   if (lowerMessage.includes("already")) {
     return "That email or username may already be in use.";
+  }
+
+  if (
+    lowerMessage.includes("sending confirmation") ||
+    lowerMessage.includes("send")
+  ) {
+    return "MuseHub could not send the verification email yet. Check that Supabase SMTP is saved, the SendPulse sender email is verified, and the SendPulse SMTP profile is approved.";
   }
 
   if (lowerMessage.includes("invalid")) {

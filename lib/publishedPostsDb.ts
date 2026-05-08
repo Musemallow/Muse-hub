@@ -25,7 +25,7 @@ export function savePublishedPosts(posts: Post[]) {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
   } catch {
-    console.error("Failed to save published posts.");
+    return;
   }
 }
 
