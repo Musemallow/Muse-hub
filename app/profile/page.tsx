@@ -16,6 +16,8 @@ export default function ProfilePage() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [saveError, setSaveError] = useState("");
+  const [profileError, setProfileError] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isClaimingDailyCheckin, setIsClaimingDailyCheckin] = useState(false);
 
   useEffect(() => {
@@ -23,15 +25,37 @@ export default function ProfilePage() {
 
     async function loadProfile() {
       try {
+        const { getSupabaseClient } = await import("../../lib/supabase");
+        const supabase = getSupabaseClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!isMounted) return;
+
+        setIsLoggedIn(Boolean(user));
+
+        if (!user) {
+          setProfile(null);
+          setProfileError("");
+          return;
+        }
+
         const currentProfile = await getCurrentProfileFromSupabase();
 
         if (!isMounted) return;
 
         setProfile(currentProfile);
-      } catch {
+        setProfileError(currentProfile ? "" : "Your account is logged in, but the profile row is not ready yet. Run the Supabase profile SQL, then refresh.");
+      } catch (error) {
         if (!isMounted) return;
 
         setProfile(null);
+        setProfileError(
+          error instanceof Error
+            ? getFriendlyProfileError(error.message)
+            : "Unable to load your profile right now."
+        );
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -82,6 +106,19 @@ export default function ProfilePage() {
   }
 
   if (!profile) {
+    if (isLoggedIn) {
+      return (
+        <ProfileAccessMessage
+          title="Profile not ready"
+          body={
+            profileError ||
+            "You are logged in, but your profile is not ready yet. Refresh in a moment or run the Supabase profile SQL."
+          }
+          showLogin
+        />
+      );
+    }
+
     return (
       <ProfileAccessMessage
         title="You're not logged in"
@@ -114,6 +151,18 @@ export default function ProfilePage() {
       />
     </>
   );
+}
+
+function getFriendlyProfileError(message: string) {
+  if (
+    message.includes("schema cache") ||
+    message.includes("birthdate") ||
+    message.includes("social_links")
+  ) {
+    return "You are logged in, but the live database is missing the latest profile columns. Run security-hardening.sql in Supabase, then refresh.";
+  }
+
+  return message;
 }
 
 function ProfileAccessMessage({

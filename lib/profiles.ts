@@ -23,6 +23,8 @@ type ProfileRow = {
 
 const profileSelect =
   "id, username, display_name, bio, status, social_handle, social_links, birthdate, show_birthdate, avatar_url, banner_url, role, membership_tier, theme_mode, points, created_at";
+const fallbackProfileSelect =
+  "id, username, display_name, bio, status, social_handle, avatar_url, banner_url, role, membership_tier, theme_mode, points, created_at";
 
 export async function getProfilesFromSupabase(): Promise<Profile[]> {
   const supabase = getSupabaseClient();
@@ -73,6 +75,32 @@ export async function getCurrentProfileFromSupabase() {
     .maybeSingle();
 
   if (error) {
+    if (
+      error.message.includes("schema cache") ||
+      error.message.includes("social_links") ||
+      error.message.includes("birthdate") ||
+      error.message.includes("show_birthdate")
+    ) {
+      const fallbackResult = await supabase
+        .from("profiles")
+        .select(fallbackProfileSelect)
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (fallbackResult.error) {
+        throw new Error(fallbackResult.error.message);
+      }
+
+      return fallbackResult.data
+        ? mapProfileRow({
+            ...fallbackResult.data,
+            social_links: {},
+            birthdate: null,
+            show_birthdate: false,
+          })
+        : null;
+    }
+
     throw new Error(error.message);
   }
 

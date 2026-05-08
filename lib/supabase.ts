@@ -15,6 +15,13 @@ export function getSupabaseClient() {
     );
   }
 
-  cachedClient ??= createClient<Database>(supabaseUrl, supabaseKey);
+  cachedClient ??= createClient<Database>(supabaseUrl, supabaseKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      flowType: "pkce",
+    },
+  });
   return cachedClient;
 }
