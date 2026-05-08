@@ -146,11 +146,19 @@ export default function CreateAccountPage() {
 
     try {
       const supabase = getSupabaseClient();
-      const { error } = await supabase.auth.verifyOtp({
+      const emailOtpResult = await supabase.auth.verifyOtp({
         email: normalizedEmail,
         token: verificationCode,
         type: "email",
       });
+      const signupOtpResult = emailOtpResult.error
+        ? await supabase.auth.verifyOtp({
+            email: normalizedEmail,
+            token: verificationCode,
+            type: "signup",
+          })
+        : null;
+      const error = emailOtpResult.error ? signupOtpResult?.error : null;
 
       if (error) {
         setErrorMessage(getFriendlyAuthError(error.message));
