@@ -22,22 +22,25 @@ export default function ProfilePage() {
 
   useEffect(() => {
     let isMounted = true;
+    let hasAuthEvent = false;
 
-    async function loadProfile() {
+    async function loadProfile(userId?: string) {
       try {
         const { getSupabaseClient } = await import("../../lib/supabase");
         const supabase = getSupabaseClient();
         const {
-          data: { user },
-        } = await supabase.auth.getUser();
+          data: { session },
+        } = await supabase.auth.getSession();
+        const activeUserId = userId ?? session?.user.id;
 
         if (!isMounted) return;
 
-        setIsLoggedIn(Boolean(user));
+        setIsLoggedIn(Boolean(activeUserId));
 
-        if (!user) {
+        if (!activeUserId) {
           setProfile(null);
           setProfileError("");
+          setIsLoading(false);
           return;
         }
 
@@ -65,8 +68,45 @@ export default function ProfilePage() {
 
     loadProfile();
 
+    async function subscribeToAuth() {
+      const { getSupabaseClient } = await import("../../lib/supabase");
+      const supabase = getSupabaseClient();
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((event, session) => {
+        if (!isMounted) return;
+
+        hasAuthEvent = true;
+        setIsLoading(true);
+        setIsLoggedIn(Boolean(session?.user));
+
+        if (!session?.user) {
+          setProfile(null);
+          setProfileError("");
+          setIsLoading(false);
+          return;
+        }
+
+        loadProfile(session.user.id);
+      });
+
+      setTimeout(() => {
+        if (isMounted && !hasAuthEvent) {
+          loadProfile();
+        }
+      }, 250);
+
+      return subscription;
+    }
+
+    let subscription: { unsubscribe: () => void } | null = null;
+    subscribeToAuth().then((authSubscription) => {
+      subscription = authSubscription;
+    });
+
     return () => {
       isMounted = false;
+      subscription?.unsubscribe();
     };
   }, []);
 
