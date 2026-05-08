@@ -84,6 +84,23 @@ export async function getLatestPosts(limit = 3) {
   return posts;
 }
 
+export async function getPostsByCreator(creatorId: string, limit = 12) {
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase
+    .from("posts")
+    .select("id, creator_id, title, content, media, visibility, published_at, created_at, profiles(display_name)")
+    .eq("creator_id", creatorId)
+    .eq("status", "published")
+    .order("published_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return Promise.all(((data ?? []) as PostRow[]).map((post) => mapFeedPost(post)));
+}
+
 export async function getPostById(postId: string) {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase

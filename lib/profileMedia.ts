@@ -51,7 +51,7 @@ export async function uploadProfileMedia(file: File, kind: ProfileMediaKind) {
   });
 
   if (error) {
-    throw new Error(error.message);
+    throw new Error(getStorageErrorMessage(error.message, bucket));
   }
 
   const { data } = supabase.storage.from(bucket).getPublicUrl(path);
@@ -107,4 +107,12 @@ function getSafeExtension(file: File) {
 
   const nameExtension = file.name.split(".").pop()?.toLowerCase();
   return nameExtension?.replace(/[^a-z0-9]/g, "") || "png";
+}
+
+function getStorageErrorMessage(message: string, bucket: string) {
+  if (message.toLowerCase().includes("bucket not found")) {
+    return `Storage is not ready yet. Run supabase/storage.sql in Supabase to create the ${bucket} bucket.`;
+  }
+
+  return message;
 }

@@ -16,12 +16,12 @@ const socialFields: {
   label: string;
   placeholder: string;
 }[] = [
-  { key: "twitch", label: "Twitch", placeholder: "musemallow" },
-  { key: "x", label: "X", placeholder: "musemallow" },
-  { key: "bsky", label: "BSKY", placeholder: "musemallow.bsky.social" },
-  { key: "instagram", label: "Instagram", placeholder: "musemallow" },
-  { key: "youtube", label: "YouTube", placeholder: "@musemallow" },
-  { key: "discord", label: "Discord", placeholder: "musemallow" },
+  { key: "twitch", label: "Twitch", placeholder: "username" },
+  { key: "x", label: "X", placeholder: "username" },
+  { key: "bsky", label: "BSKY", placeholder: "username.bsky.social" },
+  { key: "instagram", label: "Instagram", placeholder: "username" },
+  { key: "youtube", label: "YouTube", placeholder: "@username" },
+  { key: "discord", label: "Discord", placeholder: "username" },
 ];
 
 export default function EditProfileModal({
@@ -146,7 +146,7 @@ function EditProfileForm({
                 label="Username"
                 value={formData.username}
                 onChange={(value) => updateField("username", value)}
-                placeholder="musemallow"
+                placeholder="username"
                 maxLength={32}
               />
             </div>

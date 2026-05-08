@@ -51,7 +51,7 @@ export default function ProfileView({
 
         <div className="grid gap-6 lg:grid-cols-[1.5fr_0.75fr]">
           <div>
-            <ProfileTabs profileId={profile.id} />
+            <ProfileTabs profile={profile} />
           </div>
 
           <div>
