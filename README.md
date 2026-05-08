@@ -57,3 +57,5 @@ Initial database setup lives in `supabase/schema.sql`. Run it in the Supabase SQ
 After creating the owner account through `/join/create`, use `supabase/make-owner.sql` in the Supabase SQL editor to promote that account to `owner`.
 
 Profile media buckets and upload policies live in `supabase/storage.sql`.
+
+Alpha posts, comments, reactions, profile activity, and points ledger setup live in `supabase/alpha-core.sql`.

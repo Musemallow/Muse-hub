@@ -4,12 +4,37 @@ import { ReactNode } from "react";
 
 type ProfileSidebarProps = {
   profile: Profile;
+  onClaimDailyCheckin?: () => void;
+  isClaimingDailyCheckin?: boolean;
 };
 
-export default function ProfileSidebar({ profile }: ProfileSidebarProps) {
+export default function ProfileSidebar({
+  profile,
+  onClaimDailyCheckin,
+  isClaimingDailyCheckin = false,
+}: ProfileSidebarProps) {
   return (
     <aside className="space-y-6">
       <MembershipCard profile={profile} />
+
+      {onClaimDailyCheckin && (
+        <ProfilePanel eyebrow="Economy">
+          <div className="space-y-4">
+            <div>
+              <p className="text-2xl font-black text-white">{profile.points}</p>
+              <p className="mt-1 text-sm text-zinc-400">Current points</p>
+            </div>
+            <button
+              type="button"
+              onClick={onClaimDailyCheckin}
+              disabled={isClaimingDailyCheckin}
+              className="w-full rounded-full border border-blue-400/40 bg-blue-500/10 px-5 py-3 text-sm font-semibold text-blue-100 transition enabled:hover:border-blue-200 enabled:hover:bg-blue-500/20 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.03] disabled:text-zinc-600"
+            >
+              {isClaimingDailyCheckin ? "Checking In..." : "Daily Check-In"}
+            </button>
+          </div>
+        </ProfilePanel>
+      )}
 
       <ProfilePanel eyebrow="About">
         <p className="text-sm leading-7 text-zinc-300">{profile.bio}</p>

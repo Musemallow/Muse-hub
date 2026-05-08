@@ -7,9 +7,16 @@ import { Profile } from "../../types/profile";
 type ProfileViewProps = {
   profile: Profile;
   onEdit?: () => void;
+  onClaimDailyCheckin?: () => void;
+  isClaimingDailyCheckin?: boolean;
 };
 
-export default function ProfileView({ profile, onEdit }: ProfileViewProps) {
+export default function ProfileView({
+  profile,
+  onEdit,
+  onClaimDailyCheckin,
+  isClaimingDailyCheckin = false,
+}: ProfileViewProps) {
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(37,99,235,0.14),transparent_30%),linear-gradient(to_bottom,#020309,#080b12,#020309)] px-4 py-6 text-white sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
@@ -44,11 +51,15 @@ export default function ProfileView({ profile, onEdit }: ProfileViewProps) {
 
         <div className="grid gap-6 lg:grid-cols-[1.5fr_0.75fr]">
           <div>
-            <ProfileTabs />
+            <ProfileTabs profileId={profile.id} />
           </div>
 
           <div>
-            <ProfileSidebar profile={profile} />
+            <ProfileSidebar
+              profile={profile}
+              onClaimDailyCheckin={onClaimDailyCheckin}
+              isClaimingDailyCheckin={isClaimingDailyCheckin}
+            />
           </div>
         </div>
       </div>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import EditProfileModal from "../../components/profile/EditProfileModal";
 import ProfileView from "../../components/profile/ProfileView";
+import { claimDailyCheckin } from "../../lib/economy";
 import {
   getCurrentProfileFromSupabase,
   updateCurrentProfileInSupabase,
@@ -15,6 +16,7 @@ export default function ProfilePage() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [saveError, setSaveError] = useState("");
+  const [isClaimingDailyCheckin, setIsClaimingDailyCheckin] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -56,6 +58,25 @@ export default function ProfilePage() {
     }
   }
 
+  async function handleClaimDailyCheckin() {
+    if (!profile) return;
+
+    setSaveError("");
+    setIsClaimingDailyCheckin(true);
+
+    try {
+      await claimDailyCheckin();
+      const refreshedProfile = await getCurrentProfileFromSupabase();
+      if (refreshedProfile) {
+        setProfile(refreshedProfile);
+      }
+    } catch {
+      setSaveError("Daily check-in unlocks after the alpha economy tables are live.");
+    } finally {
+      setIsClaimingDailyCheckin(false);
+    }
+  }
+
   if (isLoading) {
     return <ProfileAccessMessage body="Loading your profile..." />;
   }
@@ -72,7 +93,12 @@ export default function ProfilePage() {
 
   return (
     <>
-      <ProfileView profile={profile} onEdit={() => setIsEditOpen(true)} />
+      <ProfileView
+        profile={profile}
+        onEdit={() => setIsEditOpen(true)}
+        onClaimDailyCheckin={handleClaimDailyCheckin}
+        isClaimingDailyCheckin={isClaimingDailyCheckin}
+      />
 
       {saveError && (
         <div className="fixed bottom-5 left-1/2 z-40 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 rounded-[8px] border border-red-400/40 bg-red-500/15 px-4 py-3 text-sm text-red-100 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
