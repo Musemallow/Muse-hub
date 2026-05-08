@@ -137,8 +137,8 @@ export default function CreateAccountPage() {
     setErrorMessage("");
     setStatusMessage("");
 
-    if (verificationCode.length !== 6) {
-      setErrorMessage("Enter the six-digit code from your email.");
+    if (!codeIsValid(verificationCode)) {
+      setErrorMessage("Enter the verification code from your email.");
       return;
     }
 
@@ -205,8 +205,25 @@ export default function CreateAccountPage() {
         .eq("id", user.id);
 
       if (error) {
-        setErrorMessage(getFriendlyAuthError(error.message));
-        return;
+        if (error.message.includes("birthdate")) {
+          const fallbackResult = await supabase
+            .from("profiles")
+            .update({
+              display_name: displayName.trim() || "New Wanderer",
+              avatar_url: avatarUrl.trim() || defaultProfile.avatarUrl,
+              banner_url: bannerUrl.trim() || defaultProfile.bannerUrl,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", user.id);
+
+          if (fallbackResult.error) {
+            setErrorMessage(getFriendlyAuthError(fallbackResult.error.message));
+            return;
+          }
+        } else {
+          setErrorMessage(getFriendlyAuthError(error.message));
+          return;
+        }
       }
 
       setStep("done");
@@ -315,22 +332,22 @@ export default function CreateAccountPage() {
           {step === "verify" && (
             <form className="mt-6 grid gap-4" onSubmit={handleVerifyCode}>
               <p className="text-sm leading-7 text-zinc-400">
-                Enter the six-digit code sent to {normalizedEmail}.
+                Enter the verification code sent to {normalizedEmail}.
               </p>
               <input
                 inputMode="numeric"
                 autoComplete="one-time-code"
                 value={verificationCode}
-                maxLength={6}
+                maxLength={10}
                 onChange={(event) =>
                   setVerificationCode(
-                    event.target.value.replace(/\D/g, "").slice(0, 6)
+                    event.target.value.replace(/\D/g, "").slice(0, 10)
                   )
                 }
                 className="w-full rounded-[8px] border border-white/10 bg-white/[0.04] px-4 py-4 text-center text-2xl font-black tracking-[0.35em] text-white outline-none placeholder:text-zinc-600 focus:border-blue-400/45"
                 placeholder="000000"
               />
-              <PrimaryButton disabled={verificationCode.length !== 6 || isVerifying}>
+              <PrimaryButton disabled={!codeIsValid(verificationCode) || isVerifying}>
                 {isVerifying ? "Verifying..." : "Verify Email"}
               </PrimaryButton>
             </form>
@@ -627,6 +644,10 @@ function getPasswordRules(password: string) {
       valid: /[^A-Za-z0-9]/.test(password),
     },
   ];
+}
+
+function codeIsValid(code: string) {
+  return /^\d{6,10}$/.test(code);
 }
 
 function normalizeUsername(value: string) {
