@@ -73,7 +73,7 @@ values (
     },
     "stats": {
       "memberLabel": "Member",
-      "memberValue": "Level III",
+      "memberValue": "Anomaly",
       "pointsLabel": "Points",
       "pointsValue": "1460",
       "nextEventLabel": "Next Event",
@@ -115,7 +115,7 @@ values (
         "id": "forest-pass",
         "title": "Forest Pass",
         "status": "Concept",
-        "price": "Premium perk",
+        "price": "Anomaly perk",
         "imageUrl": "/images/musemallow-banner.jpeg",
         "externalUrl": "https://twitch.tv/musemallow",
         "description": "A paid identity item tied to member cards, seasonal access, and future supporter rewards."

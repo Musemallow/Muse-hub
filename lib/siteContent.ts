@@ -63,7 +63,7 @@ export const defaultSiteContent: SiteContent = {
   },
   stats: {
     memberLabel: "Member",
-    memberValue: "Level III",
+    memberValue: "Anomaly",
     pointsLabel: "Points",
     pointsValue: "1460",
     nextEventLabel: "Next Event",

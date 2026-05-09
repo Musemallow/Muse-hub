@@ -19,3 +19,5 @@ select
 from public.profiles as profile
 join auth.users as auth_user on auth_user.id = profile.id
 where auth_user.email = 'your-email@example.com';
+
+-- tier_3 displays as Anomaly on MuseHub.

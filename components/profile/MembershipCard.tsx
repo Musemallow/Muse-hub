@@ -108,10 +108,10 @@ function AccessRow({ label, value }: { label: string; value: string }) {
 }
 
 function getMembershipTierLabel(tier: Profile["membership"]["tier"]) {
-  if (tier === "tier_1") return "Level I";
-  if (tier === "tier_2") return "Level II";
-  if (tier === "tier_3") return "Level III";
-  return "Free";
+  if (tier === "tier_1") return "Witness";
+  if (tier === "tier_2") return "Signal Infected";
+  if (tier === "tier_3") return "Anomaly";
+  return "Wanderer";
 }
 
 function getRoleLabel(role: Profile["role"]) {
