@@ -2,29 +2,54 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { getCurrentProfileFromSupabase } from "../lib/profiles";
 import { getSupabaseClient } from "../lib/supabase";
 
 export default function AuthNavLink() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [settingsHref, setSettingsHref] = useState("/profile");
 
   useEffect(() => {
     let isMounted = true;
+
+    async function updateAuthState(hasSession: boolean) {
+      if (!isMounted) return;
+
+      setIsLoggedIn(hasSession);
+
+      if (!hasSession) {
+        setSettingsHref("/profile");
+        return;
+      }
+
+      try {
+        const profile = await getCurrentProfileFromSupabase();
+
+        if (isMounted) {
+          setSettingsHref(
+            profile?.role === "owner" || profile?.role === "admin"
+              ? "/admin"
+              : "/profile"
+          );
+        }
+      } catch {
+        if (isMounted) {
+          setSettingsHref("/profile");
+        }
+      }
+    }
 
     try {
       const supabase = getSupabaseClient();
 
       supabase.auth.getSession().then(({ data }) => {
-        if (isMounted) {
-          setIsLoggedIn(Boolean(data.session?.user));
-        }
+        updateAuthState(Boolean(data.session?.user));
       });
 
       const {
         data: { subscription },
       } = supabase.auth.onAuthStateChange((event, session) => {
-        if (isMounted) {
-          setIsLoggedIn(Boolean(session?.user));
-        }
+        updateAuthState(Boolean(session?.user));
       });
 
       return () => {
@@ -44,7 +69,7 @@ export default function AuthNavLink() {
     return (
       <Link
         className="hub-nav-link inline-flex items-center gap-2"
-        href="/profile"
+        href={settingsHref}
         aria-label="Account settings"
         title="Account settings"
       >

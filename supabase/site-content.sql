@@ -33,7 +33,7 @@ create policy "Owner can create site content"
       select 1
       from public.profiles
       where id = auth.uid()
-        and role = 'owner'
+        and role in ('owner', 'admin')
     )
   );
 
@@ -46,7 +46,7 @@ create policy "Owner can update site content"
       select 1
       from public.profiles
       where id = auth.uid()
-        and role = 'owner'
+        and role in ('owner', 'admin')
     )
   )
   with check (
@@ -54,7 +54,7 @@ create policy "Owner can update site content"
       select 1
       from public.profiles
       where id = auth.uid()
-        and role = 'owner'
+        and role in ('owner', 'admin')
     )
   );
 

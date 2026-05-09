@@ -1,9 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import AuthNavLink from "../../components/AuthNavLink";
-import { storeDrops } from "../../data/landingContent";
+import { getSiteContent } from "../../lib/siteContent";
 
-export default function StorePage() {
+export default async function StorePage() {
+  const siteContent = await getSiteContent();
+
   return (
     <main className="min-h-screen bg-black px-4 py-6 text-white sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -24,7 +26,7 @@ export default function StorePage() {
         </section>
 
         <section className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {storeDrops.map((drop) => (
+          {siteContent.storeDrops.map((drop) => (
             <a
               key={drop.id}
               href={drop.externalUrl}

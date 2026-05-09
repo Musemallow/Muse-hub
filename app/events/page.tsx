@@ -1,8 +1,10 @@
 import Link from "next/link";
 import AuthNavLink from "../../components/AuthNavLink";
-import { upcomingEvents } from "../../data/landingContent";
+import { getSiteContent } from "../../lib/siteContent";
 
-export default function EventsPage() {
+export default async function EventsPage() {
+  const siteContent = await getSiteContent();
+
   return (
     <main className="min-h-screen bg-black px-4 py-6 text-white sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -22,7 +24,7 @@ export default function EventsPage() {
         </section>
 
         <section className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {upcomingEvents.map((event) => (
+          {siteContent.events.map((event) => (
             <article
               key={event.id}
               className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5"
