@@ -58,7 +58,7 @@ export async function getProfileByUsernameFromSupabase(username: string) {
     throw new Error(error.message);
   }
 
-  return data ? mapProfileRow(data) : null;
+  return data ? enrichProfileActivity(await mapProfileRow(data)) : null;
 }
 
 export async function getCurrentProfileFromSupabase() {
@@ -98,19 +98,19 @@ export async function getCurrentProfileFromSupabase() {
       }
 
       return fallbackResult.data
-        ? mapProfileRow({
+        ? enrichProfileActivity(await mapProfileRow({
             ...fallbackResult.data,
             social_links: {},
             birthdate: null,
             show_birthdate: false,
-          })
+          }))
         : null;
     }
 
     throw new Error(error.message);
   }
 
-  return data ? mapProfileRow(data) : null;
+  return data ? enrichProfileActivity(await mapProfileRow(data)) : null;
 }
 
 export async function updateCurrentProfileInSupabase(profile: Profile) {
@@ -161,7 +161,7 @@ export async function updateCurrentProfileInSupabase(profile: Profile) {
       }
 
       return mapProfileRow({
-        ...fallbackData,
+        ...(fallbackData as ProfileRow),
         social_links: profile.socialLinks ?? {},
         birthdate: profile.birthdate || null,
         show_birthdate: Boolean(profile.showBirthdate),
@@ -172,6 +172,30 @@ export async function updateCurrentProfileInSupabase(profile: Profile) {
   }
 
   return mapProfileRow(data);
+}
+
+async function enrichProfileActivity(profile: Profile) {
+  try {
+    const supabase = getSupabaseClient();
+    const since = new Date();
+    since.setDate(since.getDate() - 7);
+
+    const { count } = await supabase
+      .from("comments")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", profile.id)
+      .gte("created_at", since.toISOString());
+
+    return {
+      ...profile,
+      stats: {
+        ...profile.stats,
+        weeklyComments: count ?? 0,
+      },
+    };
+  } catch {
+    return profile;
+  }
 }
 
 function shouldRetryProfileUpdate(message: string) {
@@ -234,6 +258,7 @@ function mapProfileRow(row: ProfileRow): Profile {
       posts: 0,
       clips: 0,
       supporters: 0,
+      weeklyComments: 0,
     },
     schedule: [],
   };

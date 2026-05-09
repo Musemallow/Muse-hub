@@ -34,6 +34,7 @@ const defaultProfile: Profile = {
     posts: 0,
     clips: 0,
     supporters: 0,
+    weeklyComments: 0,
   },
   schedule: [],
 };

@@ -4,18 +4,20 @@ import { ReactNode } from "react";
 
 type ProfileSidebarProps = {
   profile: Profile;
+  isCurrentUser?: boolean;
   onClaimDailyCheckin?: () => void;
   isClaimingDailyCheckin?: boolean;
 };
 
 export default function ProfileSidebar({
   profile,
+  isCurrentUser = false,
   onClaimDailyCheckin,
   isClaimingDailyCheckin = false,
 }: ProfileSidebarProps) {
   return (
     <aside className="space-y-6">
-      <MembershipCard profile={profile} />
+      <MembershipCard profile={profile} isCurrentUser={isCurrentUser} />
 
       {onClaimDailyCheckin && (
         <ProfilePanel eyebrow="Economy">

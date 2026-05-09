@@ -1,14 +1,18 @@
 import { Profile } from "../../types/profile";
-import { getProfilePermissions } from "../../lib/profilePermissions";
 
 type MembershipCardProps = {
   profile: Profile;
+  isCurrentUser?: boolean;
 };
 
-export default function MembershipCard({ profile }: MembershipCardProps) {
+export default function MembershipCard({
+  profile,
+  isCurrentUser = false,
+}: MembershipCardProps) {
   const tierLabel = getMembershipTierLabel(profile.membership.tier);
   const roleLabel = getRoleLabel(profile.role);
-  const permissions = getProfilePermissions(profile);
+  const threatLevel = getThreatLevel(profile.stats.weeklyComments);
+  const signalStatus = isCurrentUser ? "Online" : "Offline";
 
   return (
     <section
@@ -60,25 +64,13 @@ export default function MembershipCard({ profile }: MembershipCardProps) {
 
           <div className="rounded-[8px] border border-white/10 bg-black/35 px-4 py-3">
             <p className="text-xs uppercase tracking-[0.22em] text-zinc-400">
-              Access
+              A C C E S S
             </p>
             <div className="mt-3 grid gap-2 text-sm">
-              <AccessRow
-                label="Posts"
-                value={permissions.canPost ? "Enabled" : "Locked"}
-              />
-              <AccessRow
-                label="Messages"
-                value={permissions.canMessage ? "Enabled" : "Locked"}
-              />
-              <AccessRow
-                label="Comments"
-                value={permissions.canComment ? "GIFs + Images" : "Locked"}
-              />
-              <AccessRow
-                label="Moderation"
-                value={permissions.canModerate ? "Enabled" : "Locked"}
-              />
+              <AccessRow label="Alignment" value={profile.themeMode.toUpperCase()} />
+              <AccessRow label="Clearance" value={tierLabel} />
+              <AccessRow label="Threat Level" value={threatLevel} />
+              <AccessRow label="Signal" value={signalStatus} />
             </div>
           </div>
         </div>
@@ -119,4 +111,11 @@ function getRoleLabel(role: Profile["role"]) {
   if (role === "admin") return "Admin";
   if (role === "moderator") return "Moderator";
   return "Member";
+}
+
+function getThreatLevel(weeklyCommentCount: number) {
+  if (weeklyCommentCount > 25) return "Anomalous";
+  if (weeklyCommentCount > 10) return "High";
+  if (weeklyCommentCount > 5) return "Medium";
+  return "Low";
 }

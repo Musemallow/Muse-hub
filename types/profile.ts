@@ -49,6 +49,7 @@ export type Profile = {
     posts: number;
     clips: number;
     supporters: number;
+    weeklyComments: number;
   };
   schedule: {
     day: string;

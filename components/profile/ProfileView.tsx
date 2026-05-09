@@ -7,6 +7,7 @@ import { Profile } from "../../types/profile";
 
 type ProfileViewProps = {
   profile: Profile;
+  isCurrentUser?: boolean;
   onEdit?: () => void;
   onClaimDailyCheckin?: () => void;
   isClaimingDailyCheckin?: boolean;
@@ -14,6 +15,7 @@ type ProfileViewProps = {
 
 export default function ProfileView({
   profile,
+  isCurrentUser = false,
   onEdit,
   onClaimDailyCheckin,
   isClaimingDailyCheckin = false,
@@ -56,6 +58,7 @@ export default function ProfileView({
           <div>
             <ProfileSidebar
               profile={profile}
+              isCurrentUser={isCurrentUser}
               onClaimDailyCheckin={onClaimDailyCheckin}
               isClaimingDailyCheckin={isClaimingDailyCheckin}
             />

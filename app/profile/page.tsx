@@ -178,6 +178,7 @@ export default function ProfilePage() {
     <>
       <ProfileView
         profile={profile}
+        isCurrentUser
         onEdit={() => setIsEditOpen(true)}
         onClaimDailyCheckin={handleClaimDailyCheckin}
         isClaimingDailyCheckin={isClaimingDailyCheckin}
