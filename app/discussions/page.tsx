@@ -7,6 +7,7 @@ import {
   ChannelMessage,
   discussionCategories,
 } from "../../data/discussionThreads";
+import AuthNavLink from "../../components/AuthNavLink";
 import { getProfilePermissions } from "../../lib/profilePermissions";
 import { getCurrentProfileFromSupabase } from "../../lib/profiles";
 import { Profile, ProfilePermissions } from "../../types/profile";
@@ -20,6 +21,7 @@ const loggedOutPermissions: ProfilePermissions = {
   canComment: false,
   canCommentWithImages: false,
   canCommentWithGifs: false,
+  canModerate: false,
 };
 
 export default function DiscussionsPage() {
@@ -97,9 +99,13 @@ export default function DiscussionsPage() {
       authorRole:
         currentProfile.isCreator
           ? "owner"
-          : currentProfile.membership.tier === "premium"
-            ? "premium"
-            : "member",
+          : currentProfile.role === "admin"
+            ? "moderator"
+            : currentProfile.role === "moderator"
+              ? "moderator"
+              : currentProfile.membership.tier !== "free"
+                ? "premium"
+                : "member",
       createdAt: "Just now",
       body: body || `Shared ${attachment?.label}`,
       attachmentLabel: attachment?.label,
@@ -325,9 +331,7 @@ function TopLinks() {
         <Link className="hub-nav-link" href="/profile">
           Profile
         </Link>
-        <Link className="hub-nav-link" href="/login">
-          Login
-        </Link>
+        <AuthNavLink />
       </div>
     </nav>
   );

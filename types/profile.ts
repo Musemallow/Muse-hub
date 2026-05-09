@@ -1,6 +1,7 @@
 export type ThemeMode = "sol" | "nox";
 
-export type MembershipTier = "free" | "premium";
+export type MembershipTier = "free" | "tier_1" | "tier_2" | "tier_3";
+export type ProfileRole = "owner" | "admin" | "moderator" | "member";
 
 export type Membership = {
   tier: MembershipTier;
@@ -24,6 +25,7 @@ export type ProfilePermissions = {
   canComment: boolean;
   canCommentWithImages: boolean;
   canCommentWithGifs: boolean;
+  canModerate: boolean;
 };
 
 export type Profile = {
@@ -40,6 +42,7 @@ export type Profile = {
   bannerUrl: string;
   themeMode: ThemeMode;
   points: number;
+  role: ProfileRole;
   isCreator: boolean;
   membership: Membership;
   stats: {

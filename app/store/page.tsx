@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import AuthNavLink from "../../components/AuthNavLink";
 import { storeDrops } from "../../data/landingContent";
 
 export default function StorePage() {
@@ -84,9 +85,7 @@ function TopLinks() {
         <Link className="hub-nav-link" href="/profile">
           Profile
         </Link>
-        <Link className="hub-nav-link" href="/login">
-          Login
-        </Link>
+        <AuthNavLink />
       </div>
     </nav>
   );

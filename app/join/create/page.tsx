@@ -23,6 +23,7 @@ const defaultProfile: Profile = {
   bannerUrl: "/images/profile-banner-placeholder.svg",
   themeMode: "nox",
   points: 0,
+  role: "member",
   isCreator: false,
   membership: {
     tier: "free",

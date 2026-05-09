@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AuthNavLink from "../AuthNavLink";
 import ProfileHeader from "./ProfileHeader";
 import ProfileSidebar from "./ProfileSidebar";
 import ProfileTabs from "./ProfileTabs";
@@ -41,9 +42,7 @@ export default function ProfileView({
             <Link className="hub-nav-link" href="/profile">
               Profile
             </Link>
-            <Link className="hub-nav-link" href="/login">
-              Login
-            </Link>
+            <AuthNavLink />
           </div>
         </nav>
 

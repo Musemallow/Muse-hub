@@ -2,16 +2,31 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getSupabaseClient } from "../../lib/supabase";
+
+const rememberedEmailKey = "musehub-remembered-email";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberEmail, setRememberEmail] = useState(true);
   const [statusMessage, setStatusMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    try {
+      const rememberedEmail = window.localStorage.getItem(rememberedEmailKey);
+
+      if (rememberedEmail) {
+        setEmail(rememberedEmail);
+      }
+    } catch {
+      return;
+    }
+  }, []);
 
   async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -28,6 +43,16 @@ export default function LoginPage() {
 
       if (error) {
         setErrorMessage(error.message);
+        return;
+      }
+
+      try {
+        if (rememberEmail) {
+          window.localStorage.setItem(rememberedEmailKey, email.trim());
+        } else {
+          window.localStorage.removeItem(rememberedEmailKey);
+        }
+      } catch {
         return;
       }
 
@@ -91,6 +116,16 @@ export default function LoginPage() {
                 onChange={setPassword}
                 autoComplete="current-password"
               />
+
+              <label className="flex items-center gap-3 rounded-[8px] border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-zinc-300">
+                <input
+                  type="checkbox"
+                  checked={rememberEmail}
+                  onChange={(event) => setRememberEmail(event.target.checked)}
+                  className="h-4 w-4 accent-blue-500"
+                />
+                Remember my email on this device
+              </label>
 
               <button
                 type="submit"

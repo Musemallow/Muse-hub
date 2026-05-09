@@ -8,7 +8,7 @@ type EditProfileModalProps = {
   isOpen: boolean;
   profile: Profile;
   onClose: () => void;
-  onSave: (updatedProfile: Profile) => void;
+  onSave: (updatedProfile: Profile) => Promise<boolean>;
 };
 
 const socialFields: {
@@ -64,6 +64,7 @@ function EditProfileForm({
   const [uploadingField, setUploadingField] = useState<"avatar" | "banner" | null>(
     null
   );
+  const [isSaving, setIsSaving] = useState(false);
 
   function updateField<K extends keyof Profile>(field: K, value: Profile[K]) {
     setFormData((prev) => ({
@@ -82,9 +83,21 @@ function EditProfileForm({
     }));
   }
 
-  function handleSave() {
-    onSave(formData);
-    onClose();
+  async function handleSave() {
+    setErrorMessage("");
+    setIsSaving(true);
+
+    try {
+      const didSave = await onSave(formData);
+
+      if (didSave) {
+        onClose();
+      } else {
+        setErrorMessage("Unable to save these profile changes yet.");
+      }
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   async function handleMediaUpload(
@@ -252,9 +265,10 @@ function EditProfileForm({
           <button
             type="button"
             onClick={handleSave}
+            disabled={isSaving || Boolean(uploadingField)}
             className="rounded-full border border-blue-400/40 bg-blue-500/10 px-5 py-3 text-sm font-semibold text-blue-100 transition hover:border-blue-200 hover:bg-blue-500/20 hover:text-white"
           >
-            Save Changes
+            {isSaving ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </div>

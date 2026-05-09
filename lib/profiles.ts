@@ -1,4 +1,10 @@
-import { Profile, SocialLinks, ThemeMode } from "../types/profile";
+import {
+  MembershipTier,
+  Profile,
+  ProfileRole,
+  SocialLinks,
+  ThemeMode,
+} from "../types/profile";
 import { Json } from "../types/database";
 import { getSupabaseClient } from "./supabase";
 
@@ -14,8 +20,8 @@ type ProfileRow = {
   show_birthdate: boolean | null;
   avatar_url: string | null;
   banner_url: string | null;
-  role: "owner" | "moderator" | "member";
-  membership_tier: "free" | "premium";
+  role: ProfileRole;
+  membership_tier: MembershipTier | "premium";
   theme_mode: ThemeMode;
   points: number | null;
   created_at: string;
@@ -109,34 +115,100 @@ export async function getCurrentProfileFromSupabase() {
 
 export async function updateCurrentProfileInSupabase(profile: Profile) {
   const supabase = getSupabaseClient();
+
+  const editableProfile = {
+    username: profile.username,
+    display_name: profile.displayName,
+    bio: profile.bio,
+    status: profile.status,
+    social_handle: profile.socialHandle ?? "",
+    social_links: profile.socialLinks ?? {},
+    birthdate: profile.birthdate || null,
+    show_birthdate: Boolean(profile.showBirthdate),
+    avatar_url: profile.avatarUrl,
+    banner_url: profile.bannerUrl,
+    theme_mode: profile.themeMode,
+    updated_at: new Date().toISOString(),
+  };
+
   const { data, error } = await supabase
     .from("profiles")
-    .update({
-      username: profile.username,
-      display_name: profile.displayName,
-      bio: profile.bio,
-      status: profile.status,
-      social_handle: profile.socialHandle ?? "",
-      social_links: profile.socialLinks ?? {},
-      birthdate: profile.birthdate || null,
-      show_birthdate: Boolean(profile.showBirthdate),
-      avatar_url: profile.avatarUrl,
-      banner_url: profile.bannerUrl,
-      theme_mode: profile.themeMode,
-      updated_at: new Date().toISOString(),
-    })
+    .update(editableProfile)
     .eq("id", profile.id)
     .select(profileSelect)
     .single();
 
   if (error) {
-    throw new Error(error.message);
+    if (shouldRetryProfileUpdate(error.message)) {
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from("profiles")
+        .update({
+          username: editableProfile.username,
+          display_name: editableProfile.display_name,
+          bio: editableProfile.bio,
+          status: editableProfile.status,
+          social_handle: editableProfile.social_handle,
+          avatar_url: editableProfile.avatar_url,
+          banner_url: editableProfile.banner_url,
+          theme_mode: editableProfile.theme_mode,
+        })
+        .eq("id", profile.id)
+        .select(fallbackProfileSelect)
+        .single();
+
+      if (fallbackError) {
+        throw new Error(getProfileSaveError(fallbackError.message));
+      }
+
+      return mapProfileRow({
+        ...fallbackData,
+        social_links: profile.socialLinks ?? {},
+        birthdate: profile.birthdate || null,
+        show_birthdate: Boolean(profile.showBirthdate),
+      });
+    }
+
+    throw new Error(getProfileSaveError(error.message));
   }
 
   return mapProfileRow(data);
 }
 
+function shouldRetryProfileUpdate(message: string) {
+  return (
+    message.includes("schema cache") ||
+    message.includes("social_links") ||
+    message.includes("birthdate") ||
+    message.includes("show_birthdate") ||
+    message.includes("updated_at")
+  );
+}
+
+function getProfileSaveError(message: string) {
+  if (message.includes("permission denied")) {
+    return "Supabase blocked this profile update. Run security-hardening.sql so members can update their own editable profile fields.";
+  }
+
+  if (message.includes("violates row-level security")) {
+    return "Supabase blocked this profile update with row-level security. Make sure you are logged in and run security-hardening.sql.";
+  }
+
+  if (
+    message.includes("schema cache") ||
+    message.includes("social_links") ||
+    message.includes("birthdate") ||
+    message.includes("show_birthdate") ||
+    message.includes("updated_at")
+  ) {
+    return "The live database is missing the latest profile columns. Run security-hardening.sql in Supabase, then refresh MuseHub.";
+  }
+
+  return message;
+}
+
 function mapProfileRow(row: ProfileRow): Profile {
+  const membershipTier = normalizeMembershipTier(row.membership_tier);
+
   return {
     id: row.id,
     username: row.username,
@@ -151,11 +223,12 @@ function mapProfileRow(row: ProfileRow): Profile {
     bannerUrl: row.banner_url ?? "/images/profile-banner-placeholder.svg",
     themeMode: row.theme_mode ?? "nox",
     points: row.points ?? 0,
+    role: row.role,
     isCreator: row.role === "owner",
     membership: {
-      tier: row.membership_tier ?? "free",
+      tier: membershipTier,
       memberSince: formatJoinDate(row.created_at),
-      cardId: `${row.membership_tier === "premium" ? "SIGNAL" : "WANDER"}-${row.username.slice(0, 4).toUpperCase()}`,
+      cardId: `${getMembershipCardPrefix(membershipTier)}-${row.username.slice(0, 4).toUpperCase()}`,
     },
     stats: {
       posts: 0,
@@ -164,6 +237,18 @@ function mapProfileRow(row: ProfileRow): Profile {
     },
     schedule: [],
   };
+}
+
+function normalizeMembershipTier(tier: MembershipTier | "premium") {
+  if (tier === "premium") return "tier_3";
+  return tier ?? "free";
+}
+
+function getMembershipCardPrefix(tier: MembershipTier) {
+  if (tier === "tier_3") return "ANOMALY";
+  if (tier === "tier_2") return "SIGNAL";
+  if (tier === "tier_1") return "SYNC";
+  return "WANDER";
 }
 
 function formatJoinDate(value: string) {

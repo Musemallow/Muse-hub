@@ -1,9 +1,9 @@
 -- MuseHub initial Supabase schema.
 -- Run this in the Supabase SQL editor after reviewing the values.
 
-create type public.membership_tier as enum ('free', 'premium');
+create type public.membership_tier as enum ('free', 'tier_1', 'tier_2', 'tier_3');
 create type public.theme_mode as enum ('nox', 'sol');
-create type public.profile_role as enum ('owner', 'moderator', 'member');
+create type public.profile_role as enum ('owner', 'admin', 'moderator', 'member');
 
 create table public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,

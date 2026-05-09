@@ -4,7 +4,7 @@
 update public.profiles as profile
 set
   role = 'owner',
-  membership_tier = 'premium',
+  membership_tier = 'tier_3',
   updated_at = now()
 from auth.users as auth_user
 where profile.id = auth_user.id

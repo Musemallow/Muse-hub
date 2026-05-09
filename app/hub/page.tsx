@@ -1,22 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
+import AuthNavLink from "../../components/AuthNavLink";
 import FeedPostCard from "../../components/FeedPostCard";
-import {
-  landingUpdates,
-  storeDrops,
-  upcomingEvents,
-} from "../../data/landingContent";
+import { landingUpdates } from "../../data/landingContent";
 import { discussionCategories } from "../../data/discussionThreads";
 import { getLatestPosts } from "../../lib/posts";
+import { getSiteContent } from "../../lib/siteContent";
 import "../entrance.css";
 
-const creatorOverview = {
-  bannerUrl: "/images/musemallow-banner.jpeg",
-  membershipTier: "premium",
-  points: 1460,
-};
-
 export default async function HubPage() {
+  const siteContent = await getSiteContent();
   const latestChannel =
     discussionCategories
       .flatMap((category) => category.channels)
@@ -29,7 +22,7 @@ export default async function HubPage() {
     <main className="landing-page min-h-screen bg-[#020309] text-white">
       <section className="landing-hero relative flex min-h-[92vh] items-end overflow-hidden px-4 pb-10 pt-44 sm:px-6 sm:pt-36 lg:px-8 lg:pt-36">
         <Image
-          src={creatorOverview.bannerUrl}
+          src={siteContent.hero.bannerUrl}
           alt="MuseMallow forest banner"
           fill
           priority
@@ -59,9 +52,7 @@ export default async function HubPage() {
               <Link className="hub-nav-link" href="/profile">
                 Profile
               </Link>
-              <Link className="hub-nav-link" href="/login">
-                Login
-              </Link>
+              <AuthNavLink />
             </div>
           </div>
         </nav>
@@ -78,14 +69,13 @@ export default async function HubPage() {
               draggable="false"
             />
             <p className="text-sm uppercase tracking-[0.3em] text-blue-200/80">
-              Welcome to The Forest
+              {siteContent.hero.eyebrow}
             </p>
             <h1 className="mt-3 max-w-3xl text-4xl font-black leading-tight text-white sm:text-6xl lg:text-7xl">
-              MuseMallow
+              {siteContent.hero.title}
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-8 text-zinc-200 sm:text-lg">
-              Current posts, store drops, schedule notes, and member access for
-              the MuseHub community.
+              {siteContent.hero.body}
             </p>
 
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -93,27 +83,36 @@ export default async function HubPage() {
                 href="#latest-posts"
                 className="inline-flex justify-center rounded-full border border-blue-400/60 bg-blue-500/15 px-5 py-3 text-sm font-semibold text-blue-100 shadow-[0_0_22px_rgba(37,99,235,0.22)] transition hover:border-blue-200 hover:bg-blue-500/25"
               >
-                Latest Posts
+                {siteContent.hero.primaryButtonText}
               </Link>
               <Link
                 href="/events"
                 className="inline-flex justify-center rounded-full border border-white/15 bg-black/35 px-5 py-3 text-sm font-semibold text-white transition hover:border-blue-400/45"
               >
-                Schedule
+                {siteContent.hero.secondaryButtonText}
               </Link>
               <Link
                 href="/store"
                 className="inline-flex justify-center rounded-full border border-white/15 bg-black/35 px-5 py-3 text-sm font-semibold text-white transition hover:border-blue-400/45"
               >
-                Store Drops
+                {siteContent.hero.storeButtonText}
               </Link>
             </div>
           </div>
 
           <div className="grid gap-3 rounded-[8px] border border-blue-400/15 bg-black/60 p-4 shadow-[0_18px_45px_rgba(0,0,0,0.28)] backdrop-blur-xl sm:grid-cols-3 lg:grid-cols-1">
-            <HubStat label="Member" value={creatorOverview.membershipTier} />
-            <HubStat label="Points" value={String(creatorOverview.points)} />
-            <HubStat label="Next Event" value="Sunday / 8 PM" />
+            <HubStat
+              label={siteContent.stats.memberLabel}
+              value={siteContent.stats.memberValue}
+            />
+            <HubStat
+              label={siteContent.stats.pointsLabel}
+              value={siteContent.stats.pointsValue}
+            />
+            <HubStat
+              label={siteContent.stats.nextEventLabel}
+              value={siteContent.stats.nextEventValue}
+            />
           </div>
         </div>
       </section>
@@ -121,7 +120,10 @@ export default async function HubPage() {
       <section className="px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1.35fr_0.65fr]">
           <section id="latest-posts">
-            <SectionHeading eyebrow="Posts" title="Latest From MuseMallow" />
+            <SectionHeading
+              eyebrow={siteContent.sections.postsEyebrow}
+              title={siteContent.sections.postsTitle}
+            />
             <div className="mt-5 grid gap-4">
               {latestPosts.length > 0 ? (
                 latestPosts.map((post) => (
@@ -155,9 +157,12 @@ export default async function HubPage() {
           </section>
 
           <section>
-            <SectionHeading eyebrow="Schedule" title="Coming Up" />
+            <SectionHeading
+              eyebrow={siteContent.sections.scheduleEyebrow}
+              title={siteContent.sections.scheduleTitle}
+            />
             <div className="mt-5 grid gap-3">
-              {upcomingEvents.map((event) => (
+              {siteContent.events.map((event) => (
                 <Link
                   key={event.id}
                   href="/events"
@@ -221,7 +226,10 @@ export default async function HubPage() {
       <section className="border-y border-white/10 bg-[#03050d] px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <SectionHeading eyebrow="Store" title="Drops And Perks" />
+            <SectionHeading
+              eyebrow={siteContent.sections.storeEyebrow}
+              title={siteContent.sections.storeTitle}
+            />
             <Link
               href="/store"
               className="text-sm font-semibold text-blue-200 transition hover:text-white"
@@ -231,10 +239,10 @@ export default async function HubPage() {
           </div>
 
           <div className="mt-5 grid gap-4 md:grid-cols-3">
-            {storeDrops.map((drop) => (
+            {siteContent.storeDrops.map((drop) => (
               <Link
                 key={drop.id}
-                href="/store"
+                href={drop.externalUrl || "/store"}
                 className="overflow-hidden rounded-[8px] border border-white/10 bg-black/45 shadow-[0_18px_38px_rgba(0,0,0,0.22)] transition hover:border-blue-400/35"
               >
                 <div className="relative aspect-[16/10] border-b border-white/10">

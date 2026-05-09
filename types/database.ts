@@ -243,6 +243,36 @@ export type Database = {
           },
         ];
       };
+      site_content: {
+        Row: {
+          id: string;
+          content: Json;
+          updated_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          content?: Json;
+          updated_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          content?: Json;
+          updated_by?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "site_content_updated_by_fkey";
+            columns: ["updated_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -252,7 +282,7 @@ export type Database = {
       };
     };
     Enums: {
-      membership_tier: "free" | "premium";
+      membership_tier: "free" | "tier_1" | "tier_2" | "tier_3";
       point_event_type:
         | "daily_checkin"
         | "comment_created"
@@ -260,7 +290,7 @@ export type Database = {
         | "admin_adjustment";
       post_status: "draft" | "published" | "archived";
       post_visibility: "public" | "members" | "premium";
-      profile_role: "owner" | "moderator" | "member";
+      profile_role: "owner" | "admin" | "moderator" | "member";
       reaction_type: "like";
       theme_mode: "nox" | "sol";
     };

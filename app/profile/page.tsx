@@ -116,10 +116,16 @@ export default function ProfilePage() {
     try {
       const savedProfile = await updateCurrentProfileInSupabase(updatedProfile);
       setProfile(savedProfile);
-    } catch {
-      setSaveError("Unable to save profile changes right now.");
-      setProfile(updatedProfile);
+      return true;
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to save profile changes right now.";
+      setSaveError(message);
     }
+
+    return false;
   }
 
   async function handleClaimDailyCheckin() {

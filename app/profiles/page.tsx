@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import AuthNavLink from "../../components/AuthNavLink";
 import { getProfilesFromSupabase } from "../../lib/profiles";
 
 export const dynamic = "force-dynamic";
@@ -27,9 +28,7 @@ export default async function ProfilesPage() {
             <Link className="hub-nav-link" href="/store">
               Store
             </Link>
-            <Link className="hub-nav-link" href="/login">
-              Login
-            </Link>
+            <AuthNavLink />
           </div>
         </nav>
 

@@ -21,7 +21,41 @@ export function getSupabaseClient() {
       autoRefreshToken: true,
       detectSessionInUrl: true,
       flowType: "pkce",
+      storageKey: "musehub-auth-session",
+      storage: createBrowserStorage(),
     },
   });
   return cachedClient;
+}
+
+function createBrowserStorage() {
+  return {
+    getItem(key: string) {
+      if (typeof window === "undefined") return null;
+
+      try {
+        return window.localStorage.getItem(key);
+      } catch {
+        return null;
+      }
+    },
+    setItem(key: string, value: string) {
+      if (typeof window === "undefined") return;
+
+      try {
+        window.localStorage.setItem(key, value);
+      } catch {
+        return;
+      }
+    },
+    removeItem(key: string) {
+      if (typeof window === "undefined") return;
+
+      try {
+        window.localStorage.removeItem(key);
+      } catch {
+        return;
+      }
+    },
+  };
 }

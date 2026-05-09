@@ -40,10 +40,13 @@ export default function ProfileHeader({
                     @{profile.username}
                   </p>
                   <span className="rounded-full border border-blue-300/30 bg-blue-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-blue-100">
-                    {profile.membership.tier === "premium"
-                      ? "Premium"
-                      : "Free"}
+                    {getMembershipTierLabel(profile.membership.tier)}
                   </span>
+                  {profile.role !== "member" && (
+                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-zinc-200">
+                      {profile.role}
+                    </span>
+                  )}
                 </div>
                 <h1 className="mt-1 text-3xl font-bold text-white sm:text-4xl">
                   {profile.displayName}
@@ -74,6 +77,13 @@ export default function ProfileHeader({
       </div>
     </section>
   );
+}
+
+function getMembershipTierLabel(tier: Profile["membership"]["tier"]) {
+  if (tier === "tier_1") return "Level I";
+  if (tier === "tier_2") return "Level II";
+  if (tier === "tier_3") return "Level III";
+  return "Free";
 }
 
 function ProfileStat({ label, value }: { label: string; value: number }) {
