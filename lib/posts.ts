@@ -1,5 +1,6 @@
 import { FeedPost, PostComment, PostMediaItem } from "../types/content";
 import { Json } from "../types/database";
+import { notifyMembersAboutPost } from "./notifications";
 import { getCurrentProfileFromSupabase } from "./profiles";
 import { getSupabaseClient } from "./supabase";
 
@@ -61,6 +62,12 @@ export async function createPublishedPost({
   if (error) {
     throw new Error(error.message);
   }
+
+  await notifyMembersAboutPost({
+    actor: profile,
+    postId: data.id,
+    title,
+  });
 
   return data.id;
 }

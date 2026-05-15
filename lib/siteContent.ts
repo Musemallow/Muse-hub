@@ -103,8 +103,8 @@ export async function getSiteContent() {
 export async function saveSiteContent(content: SiteContent) {
   const profile = await getCurrentProfileFromSupabase();
 
-  if (!profile || !["owner", "admin"].includes(profile.role)) {
-    throw new Error("Only an owner or admin profile can edit site content.");
+  if (!profile || profile.role !== "owner") {
+    throw new Error("Only the owner profile can edit site content.");
   }
 
   const supabase = getSupabaseClient();

@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import AuthNavLink from "../../components/AuthNavLink";
+import ProfileSearch from "../../components/profile/ProfileSearch";
 import { getProfilesFromSupabase } from "../../lib/profiles";
 
 export const dynamic = "force-dynamic";
@@ -21,6 +21,9 @@ export default async function ProfilesPage() {
           <div className="flex flex-wrap gap-2">
             <Link className="hub-nav-link" href="/discussions">
               Discussions
+            </Link>
+            <Link className="hub-nav-link" href="/profiles">
+              Members
             </Link>
             <Link className="hub-nav-link" href="/events">
               Schedule
@@ -60,59 +63,7 @@ export default async function ProfilesPage() {
             </p>
           </section>
         ) : (
-          <section className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {profiles.map((profile) => (
-            <Link
-              key={profile.id}
-              href={`/profile/${profile.username}`}
-              className="overflow-hidden rounded-[8px] border border-white/10 bg-white/[0.04] transition hover:border-blue-400/35 hover:bg-white/[0.06]"
-            >
-              <div className="relative aspect-[16/8] border-b border-white/10">
-                <Image
-                  src={profile.bannerUrl}
-                  alt={`${profile.displayName} banner`}
-                  fill
-                  className="object-cover object-[50%_38%]"
-                />
-                <div className="media-card-overlay absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.74),transparent_68%)]" />
-              </div>
-
-              <div className="p-5">
-                <div className="flex items-center gap-3">
-                  <div className="relative h-14 w-14 overflow-hidden rounded-[8px] border border-blue-400/25 bg-blue-500/10">
-                    <Image
-                      src={profile.avatarUrl}
-                      alt={`${profile.displayName} avatar`}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-bold text-white">
-                      {profile.displayName}
-                    </h2>
-                    <p className="text-sm text-zinc-500">@{profile.username}</p>
-                  </div>
-                </div>
-
-                <p className="mt-4 text-sm leading-6 text-zinc-400">
-                  {profile.status}
-                </p>
-
-                <div className="mt-5 flex flex-wrap gap-2">
-                  <span className="rounded-full border border-blue-400/25 bg-blue-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-blue-100">
-                    {profile.membership.tier}
-                  </span>
-                  {profile.isCreator && (
-                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-zinc-300">
-                      owner
-                    </span>
-                  )}
-                </div>
-              </div>
-            </Link>
-            ))}
-          </section>
+          <ProfileSearch profiles={profiles} />
         )}
       </div>
     </main>

@@ -49,6 +49,9 @@ export default async function HubPage() {
               <Link className="hub-nav-link" href="/store">
                 Store
               </Link>
+              <Link className="hub-nav-link" href="/profiles">
+                Members
+              </Link>
               <Link className="hub-nav-link" href="/profile">
                 Profile
               </Link>

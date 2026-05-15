@@ -1,12 +1,15 @@
+import Link from "next/link";
 import { Profile } from "../../types/profile";
 
 type ProfileHeaderProps = {
   profile: Profile;
+  isCurrentUser?: boolean;
   onEdit?: () => void;
 };
 
 export default function ProfileHeader({
   profile,
+  isCurrentUser = false,
   onEdit,
 }: ProfileHeaderProps) {
   return (
@@ -57,15 +60,26 @@ export default function ProfileHeader({
               </div>
             </div>
 
-            {onEdit && (
-              <button
-                type="button"
-                onClick={onEdit}
-                className="inline-flex items-center justify-center rounded-full border border-blue-400/40 bg-blue-500/10 px-5 py-3 text-sm font-semibold text-blue-100 transition hover:border-blue-200 hover:bg-blue-500/20 hover:text-white"
-              >
-                Edit Profile
-              </button>
-            )}
+            <div className="flex flex-wrap gap-2">
+              {!isCurrentUser && (
+                <Link
+                  href={`/discussions?dm=${encodeURIComponent(profile.username)}`}
+                  className="inline-flex items-center justify-center rounded-full border border-cyan-300/45 bg-cyan-500/15 px-5 py-3 text-sm font-semibold text-cyan-100 transition hover:border-cyan-200 hover:bg-cyan-500/25 hover:text-white"
+                >
+                  DM @{profile.username}
+                </Link>
+              )}
+
+              {onEdit && (
+                <button
+                  type="button"
+                  onClick={onEdit}
+                  className="inline-flex items-center justify-center rounded-full border border-blue-400/40 bg-blue-500/10 px-5 py-3 text-sm font-semibold text-blue-100 transition hover:border-blue-200 hover:bg-blue-500/20 hover:text-white"
+                >
+                  Edit Profile
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">

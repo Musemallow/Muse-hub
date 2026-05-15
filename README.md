@@ -11,8 +11,9 @@ MuseHub is a Next.js creator/community platform for MuseMallow. It includes the 
 - `/store` - external-link store listings
 - `/profile` - logged-in member profile and editable profile surface
 - `/profile/[username]` - public member profile pages
-- `/profiles` - Supabase profile directory
+- `/profiles` - searchable Supabase member directory
 - `/login` - login-first member access page
+- `/admin` - owner-only site editor for hub copy, schedule cards, and store links
 - `/join` - redirects to `/login`
 - `/join/create` - account creation with validation checks
 - `/feed` - redirects to `/hub#latest-posts`
@@ -59,3 +60,5 @@ After creating the owner account through `/join/create`, use `supabase/make-owne
 Profile media buckets and upload policies live in `supabase/storage.sql`.
 
 Alpha posts, comments, reactions, profile activity, and points ledger setup live in `supabase/alpha-core.sql`.
+
+Owner-editable hub content lives in `supabase/site-content.sql`. Live room message persistence lives in `supabase/discussions.sql`. Private DM persistence lives in `supabase/direct-messages.sql`.

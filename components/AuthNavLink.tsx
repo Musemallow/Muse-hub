@@ -7,7 +7,7 @@ import { getSupabaseClient } from "../lib/supabase";
 
 export default function AuthNavLink() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [settingsHref, setSettingsHref] = useState("/profile");
+  const [canUseSiteEditor, setCanUseSiteEditor] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -18,7 +18,7 @@ export default function AuthNavLink() {
       setIsLoggedIn(hasSession);
 
       if (!hasSession) {
-        setSettingsHref("/profile");
+        setCanUseSiteEditor(false);
         return;
       }
 
@@ -26,15 +26,11 @@ export default function AuthNavLink() {
         const profile = await getCurrentProfileFromSupabase();
 
         if (isMounted) {
-          setSettingsHref(
-            profile?.role === "owner" || profile?.role === "admin"
-              ? "/admin"
-              : "/profile"
-          );
+          setCanUseSiteEditor(profile?.role === "owner");
         }
       } catch {
         if (isMounted) {
-          setSettingsHref("/profile");
+          setCanUseSiteEditor(false);
         }
       }
     }
@@ -67,14 +63,21 @@ export default function AuthNavLink() {
 
   if (isLoggedIn) {
     return (
-      <Link
-        className="hub-nav-link inline-flex items-center gap-2"
-        href={settingsHref}
-        aria-label="Account settings"
-        title="Account settings"
-      >
-        <GearIcon />
-      </Link>
+      <>
+        {canUseSiteEditor && (
+          <Link className="hub-nav-link" href="/admin">
+            Site Editor
+          </Link>
+        )}
+        <Link
+          className="hub-nav-link inline-flex items-center gap-2"
+          href="/profile"
+          aria-label="Account settings"
+          title="Account settings"
+        >
+          <GearIcon />
+        </Link>
+      </>
     );
   }
 

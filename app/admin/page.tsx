@@ -29,10 +29,8 @@ export default function AdminPage() {
 
     async function loadAdminData() {
       try {
-        const [currentProfile, currentContent] = await Promise.all([
-          getCurrentProfileFromSupabase(),
-          getSiteContent(),
-        ]);
+        const currentProfile = await getCurrentProfileFromSupabase();
+        const currentContent = await getSiteContent();
 
         if (!isMounted) return;
 
@@ -60,7 +58,7 @@ export default function AdminPage() {
     };
   }, []);
 
-  const canEdit = profile?.role === "owner" || profile?.role === "admin";
+  const canEdit = profile?.role === "owner";
 
   async function handleSave() {
     setStatusMessage("");
@@ -87,7 +85,7 @@ export default function AdminPage() {
     return (
       <AdminAccessMessage
         title="Owner Access"
-        body="Log in with an owner or admin profile to edit MuseHub."
+        body="Log in with the owner profile to edit MuseHub."
       />
     );
   }
@@ -123,7 +121,7 @@ export default function AdminPage() {
               </h1>
               <p className="mt-4 max-w-3xl text-sm leading-7 text-zinc-400 sm:text-base">
                 Edit the hub banner, public text, schedule cards, and external
-                store links without touching code.
+                store links from the owner profile.
               </p>
             </div>
             <button

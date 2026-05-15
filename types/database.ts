@@ -273,6 +273,132 @@ export type Database = {
           },
         ];
       };
+      discussion_messages: {
+        Row: {
+          id: string;
+          channel_id: string;
+          user_id: string;
+          body: string;
+          attachment: Json;
+          is_hidden: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          channel_id: string;
+          user_id: string;
+          body?: string;
+          attachment?: Json;
+          is_hidden?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          body?: string;
+          attachment?: Json;
+          is_hidden?: boolean;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "discussion_messages_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      direct_messages: {
+        Row: {
+          id: string;
+          sender_id: string;
+          recipient_id: string;
+          body: string;
+          attachment: Json;
+          is_hidden: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          sender_id: string;
+          recipient_id: string;
+          body?: string;
+          attachment?: Json;
+          is_hidden?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          body?: string;
+          attachment?: Json;
+          is_hidden?: boolean;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "direct_messages_sender_id_fkey";
+            columns: ["sender_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "direct_messages_recipient_id_fkey";
+            columns: ["recipient_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      notifications: {
+        Row: {
+          id: string;
+          user_id: string;
+          actor_id: string | null;
+          type: string;
+          title: string;
+          body: string;
+          href: string | null;
+          metadata: Json;
+          read_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          actor_id?: string | null;
+          type: string;
+          title: string;
+          body?: string;
+          href?: string | null;
+          metadata?: Json;
+          read_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          read_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notifications_actor_id_fkey";
+            columns: ["actor_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {

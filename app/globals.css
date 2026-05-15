@@ -88,6 +88,33 @@ img {
   color: var(--mh-text);
 }
 
+.composer-tool-button {
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: rgba(207, 250, 254, 0.82);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  line-height: 1;
+  min-height: 1.75rem;
+  padding: 0.35rem 0.45rem;
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.composer-tool-button:hover:not(:disabled) {
+  background: rgba(103, 232, 249, 0.12);
+  color: #ffffff;
+}
+
+.composer-tool-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .theme-toggle {
   position: fixed;
   right: 1rem;

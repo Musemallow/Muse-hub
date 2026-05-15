@@ -11,6 +11,7 @@ export type ChannelMessage = {
   id: string;
   authorName: string;
   authorUsername: string;
+  authorAvatarUrl: string;
   authorRole: "owner" | "member" | "premium" | "moderator";
   createdAt: string;
   body: string;
@@ -60,6 +61,7 @@ export const discussionCategories: DiscussionCategory[] = [
             id: "boot-sequence-1",
             authorName: "MuseMallow",
             authorUsername: "musemallow",
+            authorAvatarUrl: "/images/profile-avatar.png",
             authorRole: "owner",
             createdAt: "Pinned",
             body: "Welcome to The Forest. This is the first signal point for orientation and server context.",
@@ -91,6 +93,7 @@ export const discussionCategories: DiscussionCategory[] = [
             id: "announcements-1",
             authorName: "MuseMallow",
             authorUsername: "musemallow",
+            authorAvatarUrl: "/images/profile-avatar.png",
             authorRole: "owner",
             createdAt: "Current",
             body: "MuseHub now has creator-built signal rooms. Members can reply, but only I create the channels.",
@@ -129,6 +132,7 @@ export const discussionCategories: DiscussionCategory[] = [
             id: "general-chat-1",
             authorName: "Wanderer",
             authorUsername: "wanderer",
+            authorAvatarUrl: "/images/profile-avatar.svg",
             authorRole: "member",
             createdAt: "2h ago",
             body: "The hub is starting to feel like a real community terminal.",

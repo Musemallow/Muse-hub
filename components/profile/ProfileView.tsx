@@ -41,6 +41,9 @@ export default function ProfileView({
             <Link className="hub-nav-link" href="/store">
               Store
             </Link>
+            <Link className="hub-nav-link" href="/profiles">
+              Members
+            </Link>
             <Link className="hub-nav-link" href="/profile">
               Profile
             </Link>
@@ -48,7 +51,11 @@ export default function ProfileView({
           </div>
         </nav>
 
-        <ProfileHeader profile={profile} onEdit={onEdit} />
+        <ProfileHeader
+          profile={profile}
+          isCurrentUser={isCurrentUser}
+          onEdit={onEdit}
+        />
 
         <div className="grid gap-6 lg:grid-cols-[1.5fr_0.75fr]">
           <div>
