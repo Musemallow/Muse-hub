@@ -157,7 +157,7 @@ create policy "Members can upload chat attachments"
   to authenticated
   with check (
     bucket_id = 'chat-attachments'
-    and (storage.foldername(name))[1] = auth.uid()::text
+    and auth.role() = 'authenticated'
   );
 
 create policy "Members can update own chat attachments"
