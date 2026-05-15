@@ -230,12 +230,6 @@ export default function ChatDock() {
             ))}
           </div>
           <div className="flex items-center gap-2">
-            <Link
-              href="/messages"
-              className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-bold text-zinc-200 hover:border-blue-400/35"
-            >
-              DMs
-            </Link>
             <button
               type="button"
               onClick={() => setIsOpen(false)}
