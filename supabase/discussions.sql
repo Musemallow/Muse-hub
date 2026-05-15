@@ -1,5 +1,6 @@
--- MuseHub Discord-lite discussion messages.
--- Run this after supabase/schema.sql so member chat can persist replies.
+-- MuseHub live room messages.
+-- Public room messages expire after four hours. Direct messages are stored separately
+-- in supabase/direct-messages.sql and do not expire automatically.
 
 create table if not exists public.discussion_messages (
   id uuid primary key default gen_random_uuid(),
@@ -22,6 +23,9 @@ create table if not exists public.discussion_messages (
 
 create index if not exists discussion_messages_channel_created_idx
   on public.discussion_messages (channel_id, created_at);
+
+create index if not exists discussion_messages_created_idx
+  on public.discussion_messages (created_at);
 
 do $$
 begin
@@ -79,3 +83,51 @@ create policy "Staff can moderate discussion messages"
         and role in ('owner', 'admin', 'moderator')
     )
   );
+
+create or replace function public.delete_expired_discussion_messages()
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  deleted_count integer;
+begin
+  delete from public.discussion_messages
+  where created_at < now() - interval '4 hours';
+
+  get diagnostics deleted_count = row_count;
+  return deleted_count;
+end;
+$$;
+
+-- Clean up immediately when this SQL is run.
+select public.delete_expired_discussion_messages();
+
+-- Supabase supports pg_cron on most projects. If cron is unavailable, the SQL
+-- still succeeds and the app will hide expired public room messages.
+do $$
+begin
+  create extension if not exists pg_cron with schema extensions;
+exception
+  when insufficient_privilege or undefined_file then null;
+end $$;
+
+do $$
+begin
+  if exists (select 1 from pg_namespace where nspname = 'cron')
+    and not exists (
+      select 1
+      from cron.job
+      where jobname = 'delete-expired-discussion-messages'
+    )
+  then
+    perform cron.schedule(
+      'delete-expired-discussion-messages',
+      '*/15 * * * *',
+      'select public.delete_expired_discussion_messages();'
+    );
+  end if;
+exception
+  when insufficient_privilege or undefined_schema or undefined_table then null;
+end $$;

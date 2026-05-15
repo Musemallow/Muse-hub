@@ -61,4 +61,4 @@ Profile media buckets and upload policies live in `supabase/storage.sql`.
 
 Alpha posts, comments, reactions, profile activity, and points ledger setup live in `supabase/alpha-core.sql`.
 
-Owner-editable hub content lives in `supabase/site-content.sql`. Live room message persistence lives in `supabase/discussions.sql`. Private DM persistence lives in `supabase/direct-messages.sql`.
+Owner-editable hub content lives in `supabase/site-content.sql`. Live room message persistence lives in `supabase/discussions.sql`; public room messages expire after four hours. Private DM persistence lives in `supabase/direct-messages.sql` and is not auto-expired.

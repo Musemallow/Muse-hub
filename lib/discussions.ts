@@ -23,6 +23,8 @@ type DiscussionMessageRow = {
     | null;
 };
 
+const DISCUSSION_MESSAGE_TTL_HOURS = 4;
+
 export function getSeedDiscussionMessages() {
   return Object.fromEntries(
     discussionCategories
@@ -36,6 +38,9 @@ export async function getDiscussionMessages(channelIds: string[]) {
 
   try {
     const supabase = getSupabaseClient();
+    const visibleAfter = new Date(
+      Date.now() - DISCUSSION_MESSAGE_TTL_HOURS * 60 * 60 * 1000
+    ).toISOString();
     const { data, error } = await supabase
       .from("discussion_messages")
       .select(
@@ -43,6 +48,7 @@ export async function getDiscussionMessages(channelIds: string[]) {
       )
       .in("channel_id", channelIds)
       .eq("is_hidden", false)
+      .gte("created_at", visibleAfter)
       .order("created_at", { ascending: true });
 
     if (error) {
