@@ -26,6 +26,13 @@ create index if not exists direct_messages_sender_created_idx
 create index if not exists direct_messages_recipient_created_idx
   on public.direct_messages (recipient_id, created_at);
 
+do $$
+begin
+  alter publication supabase_realtime add table public.direct_messages;
+exception
+  when duplicate_object then null;
+end $$;
+
 alter table public.direct_messages enable row level security;
 
 grant select on public.direct_messages to authenticated;

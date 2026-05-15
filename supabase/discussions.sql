@@ -23,6 +23,13 @@ create table if not exists public.discussion_messages (
 create index if not exists discussion_messages_channel_created_idx
   on public.discussion_messages (channel_id, created_at);
 
+do $$
+begin
+  alter publication supabase_realtime add table public.discussion_messages;
+exception
+  when duplicate_object then null;
+end $$;
+
 alter table public.discussion_messages enable row level security;
 
 grant select on public.discussion_messages to anon, authenticated;

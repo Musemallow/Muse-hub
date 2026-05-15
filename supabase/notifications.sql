@@ -26,6 +26,13 @@ create index if not exists notifications_user_unread_idx
   on public.notifications (user_id, read_at)
   where read_at is null;
 
+do $$
+begin
+  alter publication supabase_realtime add table public.notifications;
+exception
+  when duplicate_object then null;
+end $$;
+
 alter table public.notifications enable row level security;
 
 grant select on public.notifications to authenticated;
