@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import AuthNavLink from "../../components/AuthNavLink";
 import FeedPostCard from "../../components/FeedPostCard";
+import HubMemberStats from "../../components/HubMemberStats";
 import { landingUpdates } from "../../data/landingContent";
 import { discussionCategories } from "../../data/discussionThreads";
 import { getLatestPosts } from "../../lib/posts";
@@ -43,8 +44,8 @@ export default async function HubPage() {
               <Link className="hub-nav-link" href="/events">
                 Schedule
               </Link>
-              <Link className="hub-nav-link" href="/discussions">
-                Discussions
+              <Link className="hub-nav-link" href="/messages">
+                DMs
               </Link>
               <Link className="hub-nav-link" href="/store">
                 Store
@@ -103,20 +104,7 @@ export default async function HubPage() {
             </div>
           </div>
 
-          <div className="grid gap-3 rounded-[8px] border border-blue-400/15 bg-black/60 p-4 shadow-[0_18px_45px_rgba(0,0,0,0.28)] backdrop-blur-xl sm:grid-cols-3 lg:grid-cols-1">
-            <HubStat
-              label={siteContent.stats.memberLabel}
-              value={siteContent.stats.memberValue}
-            />
-            <HubStat
-              label={siteContent.stats.pointsLabel}
-              value={siteContent.stats.pointsValue}
-            />
-            <HubStat
-              label={siteContent.stats.nextEventLabel}
-              value={siteContent.stats.nextEventValue}
-            />
-          </div>
+          <HubMemberStats nextEventValue={getNextEventValue(siteContent)} />
         </div>
       </section>
 
@@ -186,16 +174,15 @@ export default async function HubPage() {
               ))}
             </div>
 
-            <Link
-              href="/discussions"
-              className="mt-4 block rounded-[8px] border border-blue-400/15 bg-[#050811]/90 p-4 shadow-[0_18px_38px_rgba(0,0,0,0.2)] transition hover:border-blue-400/40 hover:bg-[#07101d]"
+            <div
+              className="mt-4 rounded-[8px] border border-blue-400/15 bg-[#050811]/90 p-4 shadow-[0_18px_38px_rgba(0,0,0,0.2)]"
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="text-xs uppercase tracking-[0.3em] text-blue-300/75">
                   Latest Channel
                 </p>
                 <span className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-                  Signal rooms
+                  Bottom chat
                 </span>
               </div>
 
@@ -221,7 +208,7 @@ export default async function HubPage() {
                   </p>
                 </div>
               )}
-            </Link>
+            </div>
           </section>
         </div>
       </section>
@@ -290,15 +277,11 @@ async function getHubPosts() {
   }
 }
 
-function HubStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-[8px] border border-white/10 bg-white/[0.04] px-4 py-3">
-      <p className="text-xs uppercase tracking-[0.22em] text-zinc-500">
-        {label}
-      </p>
-      <p className="mt-2 text-lg font-bold capitalize text-white">{value}</p>
-    </div>
-  );
+function getNextEventValue(siteContent: Awaited<ReturnType<typeof getSiteContent>>) {
+  const nextEvent = siteContent.events[0];
+  if (!nextEvent) return "TBD";
+
+  return `${nextEvent.date} / ${nextEvent.time}`;
 }
 
 function SectionHeading({ eyebrow, title }: { eyebrow: string; title: string }) {

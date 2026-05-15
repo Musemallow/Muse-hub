@@ -118,7 +118,7 @@ export default function ProfileSearch({ profiles }: ProfileSearchProps) {
 
               <div className="border-t border-white/10 px-5 py-4">
                 <Link
-                  href={`/discussions?dm=${encodeURIComponent(profile.username)}`}
+                  href={`/messages?dm=${encodeURIComponent(profile.username)}`}
                   className="inline-flex w-full justify-center rounded-full border border-cyan-300/35 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:border-cyan-200 hover:bg-cyan-500/20"
                 >
                   DM @{profile.username}

@@ -19,8 +19,8 @@ export default async function ProfilesPage() {
             Back to Hub
           </Link>
           <div className="flex flex-wrap gap-2">
-            <Link className="hub-nav-link" href="/discussions">
-              Discussions
+            <Link className="hub-nav-link" href="/messages">
+              DMs
             </Link>
             <Link className="hub-nav-link" href="/profiles">
               Members

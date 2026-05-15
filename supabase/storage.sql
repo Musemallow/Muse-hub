@@ -35,6 +35,13 @@ values
       'audio/webm',
       'audio/ogg'
     ]
+  ),
+  (
+    'chat-attachments',
+    'chat-attachments',
+    true,
+    10485760,
+    array['image/jpeg', 'image/png', 'image/webp', 'image/gif']
   )
 on conflict (id) do update
 set
@@ -49,11 +56,14 @@ drop policy if exists "Members can delete own profile media" on storage.objects;
 drop policy if exists "Owner can upload post media" on storage.objects;
 drop policy if exists "Owner can update post media" on storage.objects;
 drop policy if exists "Owner can delete post media" on storage.objects;
+drop policy if exists "Members can upload chat attachments" on storage.objects;
+drop policy if exists "Members can update own chat attachments" on storage.objects;
+drop policy if exists "Members can delete own chat attachments" on storage.objects;
 
 create policy "Profile media is publicly readable"
   on storage.objects
   for select
-  using (bucket_id in ('avatars', 'banners', 'post-media'));
+  using (bucket_id in ('avatars', 'banners', 'post-media', 'chat-attachments'));
 
 create policy "Members can upload own profile media"
   on storage.objects
@@ -138,5 +148,36 @@ create policy "Owner can delete post media"
       where id = auth.uid()
         and role = 'owner'
     )
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "Members can upload chat attachments"
+  on storage.objects
+  for insert
+  to authenticated
+  with check (
+    bucket_id = 'chat-attachments'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "Members can update own chat attachments"
+  on storage.objects
+  for update
+  to authenticated
+  using (
+    bucket_id = 'chat-attachments'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  )
+  with check (
+    bucket_id = 'chat-attachments'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "Members can delete own chat attachments"
+  on storage.objects
+  for delete
+  to authenticated
+  using (
+    bucket_id = 'chat-attachments'
     and (storage.foldername(name))[1] = auth.uid()::text
   );

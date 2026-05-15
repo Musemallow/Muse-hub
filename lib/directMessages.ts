@@ -128,7 +128,7 @@ export async function createDirectMessage({
       type: "direct_message",
       title: `New message from ${sender.displayName}`,
       body,
-      href: `/discussions?dm=${sender.username}`,
+      href: `/messages?dm=${sender.username}`,
       metadata: { senderUsername: sender.username },
     });
 

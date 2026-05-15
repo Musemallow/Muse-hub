@@ -21,6 +21,12 @@ export type EditableEventItem = {
   location: string;
 };
 
+export type EditableChatRoom = {
+  id: string;
+  name: string;
+  description: string;
+};
+
 export type SiteContent = {
   hero: {
     bannerUrl: string;
@@ -49,6 +55,7 @@ export type SiteContent = {
   };
   events: EditableEventItem[];
   storeDrops: EditableStoreDrop[];
+  chatRooms: EditableChatRoom[];
 };
 
 export const defaultSiteContent: SiteContent = {
@@ -79,6 +86,26 @@ export const defaultSiteContent: SiteContent = {
   },
   events: upcomingEvents,
   storeDrops,
+  chatRooms: [
+    {
+      id: "general-chat",
+      name: "General Chat",
+      description:
+        "General conversation, daily chatter, and casual community talk.",
+    },
+    {
+      id: "questions",
+      name: "Questions",
+      description:
+        "Ask questions about streams, posts, memberships, or how MuseHub works.",
+    },
+    {
+      id: "feedback",
+      name: "Feedback",
+      description:
+        "Share feedback, report issues, and suggest improvements for MuseHub.",
+    },
+  ],
 };
 
 export async function getSiteContent() {
@@ -162,6 +189,11 @@ function sanitizeSiteContent(content: SiteContent): SiteContent {
       description: cleanText(drop.description, 400),
       imageUrl: cleanText(drop.imageUrl, 500),
       externalUrl: cleanText(drop.externalUrl, 500),
+    })),
+    chatRooms: content.chatRooms.slice(0, 12).map((room) => ({
+      id: cleanId(room.id || room.name),
+      name: cleanText(room.name, 60),
+      description: cleanText(room.description, 240),
     })),
   };
 }
@@ -257,6 +289,10 @@ function normalizeSiteContent(value: Json): SiteContent {
       content.storeDrops,
       defaultSiteContent.storeDrops
     ).map(normalizeStoreDrop),
+    chatRooms: readArray(
+      content.chatRooms,
+      defaultSiteContent.chatRooms
+    ).map(normalizeChatRoom),
   });
 }
 
@@ -281,6 +317,17 @@ function normalizeStoreDrop(value: Json): EditableStoreDrop {
     description: readString(drop.description, ""),
     imageUrl: readString(drop.imageUrl, "/images/store-placeholder.svg"),
     externalUrl: readString(drop.externalUrl, "https://twitch.tv/musemallow"),
+  };
+}
+
+function normalizeChatRoom(value: Json): EditableChatRoom {
+  const room = readObject(value);
+  const name = readString(room.name, "General Chat");
+
+  return {
+    id: readString(room.id, cleanId(name)),
+    name,
+    description: readString(room.description, "A MuseHub community room."),
   };
 }
 

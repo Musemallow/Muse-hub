@@ -123,6 +123,28 @@ export async function getCurrentNotifications() {
   })) satisfies MuseNotification[];
 }
 
+export async function getUnreadNotificationCount(types?: string[]) {
+  const profile = await getCurrentProfileFromSupabase();
+  if (!profile) return 0;
+
+  const supabase = getSupabaseClient();
+  let query = supabase
+    .from("notifications")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", profile.id)
+    .is("read_at", null);
+
+  if (types && types.length > 0) {
+    query = query.in("type", types);
+  }
+
+  const { count, error } = await query;
+
+  if (error) return 0;
+
+  return count ?? 0;
+}
+
 export async function markNotificationRead(notificationId: string) {
   const supabase = getSupabaseClient();
   await supabase

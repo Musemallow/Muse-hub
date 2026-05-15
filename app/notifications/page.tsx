@@ -68,8 +68,8 @@ export default function NotificationsPage() {
             Back to Hub
           </Link>
           <div className="flex flex-wrap gap-2">
-            <Link className="hub-nav-link" href="/discussions">
-              Chat
+            <Link className="hub-nav-link" href="/messages">
+              DMs
             </Link>
             <Link className="hub-nav-link" href="/profiles">
               Members

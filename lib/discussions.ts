@@ -1,6 +1,8 @@
 import { ChannelMessage, discussionCategories } from "../data/discussionThreads";
 import { Json } from "../types/database";
 import { Profile } from "../types/profile";
+import { createNotification } from "./notifications";
+import { getProfilesFromSupabase } from "./profiles";
 import { getSupabaseClient } from "./supabase";
 
 type DiscussionMessageRow = {
@@ -102,9 +104,60 @@ export async function createDiscussionMessage({
       return optimisticMessage;
     }
 
+    await notifyMentionedMembers({
+      actor: profile,
+      body,
+      channelId,
+    });
+
     return mapDiscussionMessageRow(data as DiscussionMessageRow);
   } catch {
     return optimisticMessage;
+  }
+}
+
+async function notifyMentionedMembers({
+  actor,
+  body,
+  channelId,
+}: {
+  actor: Profile;
+  body: string;
+  channelId: string;
+}) {
+  const mentionedUsernames = Array.from(
+    new Set(
+      [...body.matchAll(/@([a-z0-9_-]{3,32})/gi)].map((match) =>
+        match[1].toLowerCase()
+      )
+    )
+  );
+
+  if (mentionedUsernames.length === 0) return;
+
+  try {
+    const profiles = await getProfilesFromSupabase();
+    const recipients = profiles.filter(
+      (profile) =>
+        profile.id !== actor.id &&
+        mentionedUsernames.includes(profile.username.toLowerCase())
+    );
+
+    await Promise.all(
+      recipients.map((recipient) =>
+        createNotification({
+          userId: recipient.id,
+          actorId: actor.id,
+          type: "discussion_mention",
+          title: `${actor.displayName} mentioned you`,
+          body,
+          href: "/discussions",
+          metadata: { channelId, actorUsername: actor.username },
+        })
+      )
+    );
+  } catch {
+    return;
   }
 }
 

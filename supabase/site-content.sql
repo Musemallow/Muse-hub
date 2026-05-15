@@ -138,7 +138,49 @@ values (
         "externalUrl": "https://twitch.tv/musemallow",
         "description": "A future store item for expressive comments, community posts, and profile decoration."
       }
+    ],
+    "chatRooms": [
+      {
+        "id": "general-chat",
+        "name": "General Chat",
+        "description": "General conversation, daily chatter, and casual community talk."
+      },
+      {
+        "id": "questions",
+        "name": "Questions",
+        "description": "Ask questions about streams, posts, memberships, or how MuseHub works."
+      },
+      {
+        "id": "feedback",
+        "name": "Feedback",
+        "description": "Share feedback, report issues, and suggest improvements for MuseHub."
+      }
     ]
   }'::jsonb
 )
 on conflict (id) do nothing;
+
+update public.site_content
+set
+  content = content || '{
+    "chatRooms": [
+      {
+        "id": "general-chat",
+        "name": "General Chat",
+        "description": "General conversation, daily chatter, and casual community talk."
+      },
+      {
+        "id": "questions",
+        "name": "Questions",
+        "description": "Ask questions about streams, posts, memberships, or how MuseHub works."
+      },
+      {
+        "id": "feedback",
+        "name": "Feedback",
+        "description": "Share feedback, report issues, and suggest improvements for MuseHub."
+      }
+    ]
+  }'::jsonb,
+  updated_at = now()
+where id = 'main'
+  and not (content ? 'chatRooms');

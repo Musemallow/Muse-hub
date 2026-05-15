@@ -70,8 +70,8 @@ function TopLinks() {
         <Link className="hub-nav-link" href="/store">
           Store
         </Link>
-        <Link className="hub-nav-link" href="/discussions">
-          Discussions
+        <Link className="hub-nav-link" href="/messages">
+          DMs
         </Link>
         <Link className="hub-nav-link" href="/profile">
           Profile

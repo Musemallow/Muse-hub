@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ReactNode, useEffect, useState } from "react";
 import {
   EditableEventItem,
+  EditableChatRoom,
   EditableStoreDrop,
   SiteContent,
   defaultSiteContent,
@@ -13,7 +14,7 @@ import {
 import { getCurrentProfileFromSupabase } from "../../lib/profiles";
 import { Profile } from "../../types/profile";
 
-type AdminTab = "hub" | "schedule" | "store";
+type AdminTab = "hub" | "schedule" | "rooms" | "store";
 
 export default function AdminPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -162,6 +163,11 @@ export default function AdminPage() {
             onClick={() => setActiveTab("schedule")}
           />
           <TabButton
+            label="Rooms"
+            isActive={activeTab === "rooms"}
+            onClick={() => setActiveTab("rooms")}
+          />
+          <TabButton
             label="Store"
             isActive={activeTab === "store"}
             onClick={() => setActiveTab("store")}
@@ -174,6 +180,9 @@ export default function AdminPage() {
           )}
           {activeTab === "schedule" && (
             <ScheduleEditor content={content} onChange={setContent} />
+          )}
+          {activeTab === "rooms" && (
+            <RoomsEditor content={content} onChange={setContent} />
           )}
           {activeTab === "store" && (
             <StoreEditor content={content} onChange={setContent} />
@@ -265,23 +274,10 @@ function HubEditor({
 
       <EditorSection
         eyebrow="Hub"
-        title="Stats And Section Headers"
-        body="Small labels used across the hub page."
+        title="Section Headers"
+        body="Small labels used across the hub page. Member tier and points are automatic for the logged-in viewer."
       >
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {Object.entries(content.stats).map(([key, value]) => (
-            <TextField
-              key={key}
-              label={formatFieldLabel(key)}
-              value={value}
-              onChange={(nextValue) =>
-                onChange({
-                  ...content,
-                  stats: { ...content.stats, [key]: nextValue },
-                })
-              }
-            />
-          ))}
           {Object.entries(content.sections).map(([key, value]) => (
             <TextField
               key={key}
@@ -384,6 +380,87 @@ function ScheduleEditor({
         className="rounded-full border border-blue-400/35 bg-blue-500/10 px-5 py-3 text-sm font-semibold text-blue-100 transition hover:border-blue-200"
       >
         Add Schedule Item
+      </button>
+    </EditorSection>
+  );
+}
+
+function RoomsEditor({
+  content,
+  onChange,
+}: {
+  content: SiteContent;
+  onChange: (content: SiteContent) => void;
+}) {
+  function updateRoom(index: number, updates: Partial<EditableChatRoom>) {
+    onChange({
+      ...content,
+      chatRooms: content.chatRooms.map((room, roomIndex) =>
+        roomIndex === index ? { ...room, ...updates } : room
+      ),
+    });
+  }
+
+  function removeRoom(index: number) {
+    onChange({
+      ...content,
+      chatRooms: content.chatRooms.filter((room, roomIndex) => roomIndex !== index),
+    });
+  }
+
+  function addRoom() {
+    onChange({
+      ...content,
+      chatRooms: [
+        ...content.chatRooms,
+        {
+          id: `room-${Date.now()}`,
+          name: "New Room",
+          description: "A MuseHub community room.",
+        },
+      ],
+    });
+  }
+
+  return (
+    <EditorSection
+      eyebrow="Chat"
+      title="Community Rooms"
+      body="These rooms appear in the bottom chat dock across MuseHub."
+    >
+      <div className="grid gap-4">
+        {content.chatRooms.map((room, index) => (
+          <EditableCard
+            key={room.id}
+            title={room.name || "Untitled room"}
+            onRemove={() => removeRoom(index)}
+          >
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField
+                label="Room ID"
+                value={room.id}
+                onChange={(value) => updateRoom(index, { id: value })}
+              />
+              <TextField
+                label="Room Name"
+                value={room.name}
+                onChange={(value) => updateRoom(index, { name: value })}
+              />
+            </div>
+            <TextArea
+              label="Description"
+              value={room.description}
+              onChange={(value) => updateRoom(index, { description: value })}
+            />
+          </EditableCard>
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={addRoom}
+        className="rounded-full border border-blue-400/35 bg-blue-500/10 px-5 py-3 text-sm font-semibold text-blue-100 transition hover:border-blue-200"
+      >
+        Add Room
       </button>
     </EditorSection>
   );

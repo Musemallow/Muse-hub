@@ -63,7 +63,7 @@ export default function ProfileHeader({
             <div className="flex flex-wrap gap-2">
               {!isCurrentUser && (
                 <Link
-                  href={`/discussions?dm=${encodeURIComponent(profile.username)}`}
+                  href={`/messages?dm=${encodeURIComponent(profile.username)}`}
                   className="inline-flex items-center justify-center rounded-full border border-cyan-300/45 bg-cyan-500/15 px-5 py-3 text-sm font-semibold text-cyan-100 transition hover:border-cyan-200 hover:bg-cyan-500/25 hover:text-white"
                 >
                   DM @{profile.username}

@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import ChatDock from "../components/ChatDock";
+import MessageBell from "../components/MessageBell";
 import ThemeProvider from "../components/theme/ThemeProvider";
 import ThemeToggle from "../components/theme/ThemeToggle";
 import "./globals.css";
@@ -22,6 +24,8 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <ThemeProvider>
           {children}
+          <MessageBell />
+          <ChatDock />
           <ThemeToggle />
         </ThemeProvider>
       </body>

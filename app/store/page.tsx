@@ -81,8 +81,8 @@ function TopLinks() {
         <Link className="hub-nav-link" href="/events">
           Schedule
         </Link>
-        <Link className="hub-nav-link" href="/discussions">
-          Discussions
+        <Link className="hub-nav-link" href="/messages">
+          DMs
         </Link>
         <Link className="hub-nav-link" href="/profile">
           Profile
