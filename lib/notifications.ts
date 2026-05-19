@@ -153,6 +153,20 @@ export async function markNotificationRead(notificationId: string) {
     .eq("id", notificationId);
 }
 
+export async function markDirectMessageNotificationsRead(senderUsername: string) {
+  const profile = await getCurrentProfileFromSupabase();
+  if (!profile) return;
+
+  const supabase = getSupabaseClient();
+  await supabase
+    .from("notifications")
+    .update({ read_at: new Date().toISOString() })
+    .eq("user_id", profile.id)
+    .eq("type", "direct_message")
+    .is("read_at", null)
+    .contains("metadata", { senderUsername });
+}
+
 function formatNotificationTime(value: string) {
   const createdAt = new Date(value);
   const elapsedMs = Date.now() - createdAt.getTime();

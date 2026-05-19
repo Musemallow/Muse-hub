@@ -70,10 +70,10 @@ export default function ProfileSearch({ profiles }: ProfileSearchProps) {
             >
               <Link href={`/profile/${profile.username}`} className="block">
                 <div className="relative aspect-[16/8] border-b border-white/10">
-                  <Image
-                    src={profile.bannerUrl}
+                  <SafeProfileImage
+                    src={getProfileMediaUrl(profile.bannerUrl, "banner")}
+                    fallback="/images/profile-banner-placeholder.svg"
                     alt={`${profile.displayName} banner`}
-                    fill
                     className="object-cover object-[50%_38%]"
                   />
                   <div className="media-card-overlay absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.74),transparent_68%)]" />
@@ -82,10 +82,10 @@ export default function ProfileSearch({ profiles }: ProfileSearchProps) {
                 <div className="p-5">
                   <div className="flex items-center gap-3">
                     <div className="relative h-14 w-14 overflow-hidden rounded-[8px] border border-blue-400/25 bg-blue-500/10">
-                      <Image
+                      <SafeProfileImage
                         src={profile.avatarUrl}
+                        fallback="/images/profile-avatar.svg"
                         alt={`${profile.displayName} avatar`}
-                        fill
                         className="object-cover"
                       />
                     </div>
@@ -130,4 +130,40 @@ export default function ProfileSearch({ profiles }: ProfileSearchProps) {
       )}
     </section>
   );
+}
+
+function SafeProfileImage({
+  src,
+  fallback,
+  alt,
+  className,
+}: {
+  src: string;
+  fallback: string;
+  alt: string;
+  className: string;
+}) {
+  const [imageSrc, setImageSrc] = useState(getProfileMediaUrl(src, "avatar"));
+
+  return (
+    <Image
+      src={imageSrc}
+      alt={alt}
+      fill
+      unoptimized
+      onError={() => setImageSrc(fallback)}
+      className={className}
+    />
+  );
+}
+
+function getProfileMediaUrl(value: string, kind: "avatar" | "banner") {
+  const fallback =
+    kind === "avatar"
+      ? "/images/profile-avatar.svg"
+      : "/images/profile-banner-placeholder.svg";
+
+  if (!value || value === "null" || value === "undefined") return fallback;
+
+  return value;
 }

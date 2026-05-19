@@ -72,6 +72,38 @@ export async function createPublishedPost({
   return data.id;
 }
 
+export async function updatePublishedPost({
+  postId,
+  content,
+  visibility = "public",
+}: {
+  postId: string;
+  content: string;
+  visibility?: "public" | "members" | "premium";
+}) {
+  const profile = await getCurrentProfileFromSupabase();
+  if (!profile?.isCreator) {
+    throw new Error("Only the owner can edit posts.");
+  }
+
+  const supabase = getSupabaseClient();
+  const title = makePostTitle(content);
+  const { error } = await supabase
+    .from("posts")
+    .update({
+      title,
+      content,
+      visibility,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", postId)
+    .eq("creator_id", profile.id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
 export async function getLatestPosts(limit = 3) {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase

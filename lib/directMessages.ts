@@ -56,6 +56,10 @@ type ProfileLookupRow = {
   role: Profile["role"] | null;
 };
 
+type DmBlockRow = {
+  blocked_id: string;
+};
+
 export async function getDirectMessageThreads(profile: Profile) {
   try {
     const supabase = getSupabaseClient();
@@ -104,6 +108,10 @@ export async function createDirectMessage({
   body: string;
   attachment?: ChannelMessage["attachment"];
 }) {
+  if (await isDirectMessageBlocked(sender.id, recipient.id)) {
+    throw new Error("This private message is blocked.");
+  }
+
   const optimisticMessage = createLocalDirectMessage({ sender, body, attachment });
 
   try {
@@ -121,7 +129,11 @@ export async function createDirectMessage({
       )
       .single();
 
-    if (error || !data) return optimisticMessage;
+    if (error) {
+      throw new Error(getDirectMessageError(error.message));
+    }
+
+    if (!data) return optimisticMessage;
 
     await createNotification({
       userId: recipient.id,
@@ -134,8 +146,107 @@ export async function createDirectMessage({
     });
 
     return mapDirectMessageRow(data as DirectMessageRow);
+  } catch (error) {
+    throw new Error(
+      error instanceof Error ? error.message : "Unable to send message."
+    );
+  }
+}
+
+export async function getBlockedDirectMessageMemberIds(profileId: string) {
+  try {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+      .from("dm_blocks" as never)
+      .select("blocked_id")
+      .eq("blocker_id", profileId);
+
+    if (error) return new Set<string>();
+
+    return new Set(
+      ((data ?? []) as DmBlockRow[]).map((row) => row.blocked_id)
+    );
   } catch {
-    return optimisticMessage;
+    return new Set<string>();
+  }
+}
+
+export async function blockDirectMessageMember(memberId: string) {
+  const supabase = getSupabaseClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    throw new Error("Log in before blocking a member.");
+  }
+
+  if (user.id === memberId) {
+    throw new Error("You cannot block yourself.");
+  }
+
+  const { error } = await supabase.from("dm_blocks" as never).upsert({
+    blocker_id: user.id,
+    blocked_id: memberId,
+  } as never);
+
+  if (error) {
+    throw new Error(getDirectMessageSafetyError(error.message));
+  }
+}
+
+export async function reportDirectMessageMember({
+  reportedId,
+  reason,
+  messageIds,
+}: {
+  reportedId: string;
+  reason: string;
+  messageIds: string[];
+}) {
+  const supabase = getSupabaseClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    throw new Error("Log in before reporting a DM.");
+  }
+
+  if (user.id === reportedId) {
+    throw new Error("You cannot report yourself.");
+  }
+
+  const { error } = await supabase.from("dm_reports" as never).insert({
+    reporter_id: user.id,
+    reported_id: reportedId,
+    reason: reason.trim() || "No reason provided.",
+    message_ids: messageIds.slice(-10),
+  } as never);
+
+  if (error) {
+    throw new Error(getDirectMessageSafetyError(error.message));
+  }
+}
+
+async function isDirectMessageBlocked(senderId: string, recipientId: string) {
+  try {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+      .from("dm_blocks" as never)
+      .select("blocker_id")
+      .or(
+        `and(blocker_id.eq.${senderId},blocked_id.eq.${recipientId}),and(blocker_id.eq.${recipientId},blocked_id.eq.${senderId})`
+      )
+      .limit(1);
+
+    if (error) return false;
+
+    return Boolean(data?.length);
+  } catch {
+    return false;
   }
 }
 
@@ -284,4 +395,20 @@ function formatMessageTime(value: string) {
     month: "short",
     day: "numeric",
   }).format(createdAt);
+}
+
+function getDirectMessageError(message: string) {
+  if (message.includes("row-level security")) {
+    return "This private message is blocked.";
+  }
+
+  return message;
+}
+
+function getDirectMessageSafetyError(message: string) {
+  if (message.includes("dm_blocks") || message.includes("dm_reports")) {
+    return "DM safety tables are not ready yet. Run supabase/direct-messages.sql again.";
+  }
+
+  return message;
 }

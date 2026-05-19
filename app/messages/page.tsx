@@ -7,12 +7,16 @@ import AuthNavLink from "../../components/AuthNavLink";
 import { ChannelMessage } from "../../data/discussionThreads";
 import { uploadChatImage } from "../../lib/chatMedia";
 import {
+  blockDirectMessageMember,
   createDirectMessage,
   DirectMessageMember,
   DirectMessageThread,
+  getBlockedDirectMessageMemberIds,
   getDirectMessageThreads,
   getProfileDmMember,
+  reportDirectMessageMember,
 } from "../../lib/directMessages";
+import { markDirectMessageNotificationsRead } from "../../lib/notifications";
 import { getCurrentProfileFromSupabase, getProfilesFromSupabase } from "../../lib/profiles";
 import { getSupabaseClient } from "../../lib/supabase";
 import { searchTenorGifs, tenorGifToAttachment, TenorGif } from "../../lib/tenor";
@@ -27,6 +31,9 @@ export default function MessagesPage() {
   const [memberQuery, setMemberQuery] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [blockedMemberIds, setBlockedMemberIds] = useState<Set<string>>(
+    () => new Set()
+  );
   const [isGifSearchOpen, setIsGifSearchOpen] = useState(false);
   const [gifQuery, setGifQuery] = useState("");
   const [gifResults, setGifResults] = useState<TenorGif[]>([]);
@@ -34,6 +41,9 @@ export default function MessagesPage() {
   const feedRef = useRef<HTMLDivElement | null>(null);
   const activeThread =
     threads.find((thread) => thread.id === activeThreadId) ?? threads[0];
+  const isActiveMemberBlocked = activeThread
+    ? blockedMemberIds.has(activeThread.member.id)
+    : false;
   const filteredProfiles = useMemo(() => {
     const query = memberQuery.trim().toLowerCase();
     const members = currentProfile
@@ -68,6 +78,7 @@ export default function MessagesPage() {
         if (!profile) return;
 
         const loadedThreads = await getDirectMessageThreads(profile);
+        const blockedIds = await getBlockedDirectMessageMemberIds(profile.id);
         let nextThreads = loadedThreads;
 
         if (requestedDm) {
@@ -82,6 +93,7 @@ export default function MessagesPage() {
 
         if (isMounted) {
           setThreads(nextThreads);
+          setBlockedMemberIds(blockedIds);
         }
       } catch (error) {
         if (isMounted) {
@@ -136,6 +148,14 @@ export default function MessagesPage() {
     });
   }, [activeThread?.messages.length, activeThreadId]);
 
+  useEffect(() => {
+    if (!activeThread) return;
+
+    markDirectMessageNotificationsRead(activeThread.member.username).catch(
+      () => undefined
+    );
+  }, [activeThread]);
+
   function openMember(profile: Profile) {
     const member: DirectMessageMember = {
       id: profile.id,
@@ -151,7 +171,9 @@ export default function MessagesPage() {
   }
 
   async function sendMessage(attachment?: ChannelMessage["attachment"]) {
-    if (!currentProfile || !activeThread || isSending) return;
+    if (!currentProfile || !activeThread || isSending || isActiveMemberBlocked) {
+      return;
+    }
 
     const body = draftMessage.trim();
     if (!body && !attachment) return;
@@ -215,6 +237,47 @@ export default function MessagesPage() {
     } catch (error) {
       setStatusMessage(
         error instanceof Error ? error.message : "Unable to search GIFs."
+      );
+    }
+  }
+
+  async function handleBlockActiveMember() {
+    if (!activeThread) return;
+
+    const confirmed = window.confirm(
+      `Block @${activeThread.member.username} from privately messaging you?`
+    );
+    if (!confirmed) return;
+
+    try {
+      await blockDirectMessageMember(activeThread.member.id);
+      setBlockedMemberIds((current) => new Set(current).add(activeThread.member.id));
+      setStatusMessage(`Blocked @${activeThread.member.username} from DMs.`);
+    } catch (error) {
+      setStatusMessage(
+        error instanceof Error ? error.message : "Unable to block this member."
+      );
+    }
+  }
+
+  async function handleReportActiveMember() {
+    if (!activeThread) return;
+
+    const reason = window.prompt(
+      `Report @${activeThread.member.username}. What should moderators know?`
+    );
+    if (reason === null) return;
+
+    try {
+      await reportDirectMessageMember({
+        reportedId: activeThread.member.id,
+        reason,
+        messageIds: activeThread.messages.map((message) => message.id),
+      });
+      setStatusMessage(`Report sent for @${activeThread.member.username}.`);
+    } catch (error) {
+      setStatusMessage(
+        error instanceof Error ? error.message : "Unable to report this member."
       );
     }
   }
@@ -320,15 +383,46 @@ export default function MessagesPage() {
           </aside>
 
           <section className="flex min-h-[560px] flex-col bg-[#07101d]">
-            <header className="border-b border-blue-400/15 bg-black/25 px-4 py-3">
-              <h1 className="text-lg font-black text-blue-50">
-                {activeThread ? activeThread.member.name : "Choose a member"}
-              </h1>
-              <p className="mt-1 text-xs text-zinc-500">
-                {activeThread
-                  ? `Private messages with @${activeThread.member.username}`
-                  : "Search members on the left to start a DM."}
-              </p>
+            <header className="flex flex-wrap items-start justify-between gap-3 border-b border-blue-400/15 bg-black/25 px-4 py-3">
+              <div>
+                <h1 className="text-lg font-black text-blue-50">
+                  {activeThread ? (
+                    <Link
+                      href={`/profile/${activeThread.member.username}`}
+                      className="hover:text-blue-200"
+                    >
+                      {activeThread.member.name}
+                    </Link>
+                  ) : (
+                    "Choose a member"
+                  )}
+                </h1>
+                <p className="mt-1 text-xs text-zinc-500">
+                  {activeThread
+                    ? `Private messages with @${activeThread.member.username}`
+                    : "Search members on the left to start a DM."}
+                </p>
+              </div>
+
+              {activeThread && (
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={handleReportActiveMember}
+                    className="rounded-[4px] border border-amber-300/35 bg-amber-500/10 px-3 py-1.5 text-xs font-black text-amber-100 transition hover:border-amber-200"
+                  >
+                    Report
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleBlockActiveMember}
+                    disabled={isActiveMemberBlocked}
+                    className="rounded-[4px] border border-red-300/35 bg-red-500/10 px-3 py-1.5 text-xs font-black text-red-100 transition enabled:hover:border-red-200 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isActiveMemberBlocked ? "Blocked" : "Block"}
+                  </button>
+                </div>
+              )}
             </header>
 
             <div ref={feedRef} className="flex-1 overflow-y-auto p-3">
@@ -404,6 +498,7 @@ export default function MessagesPage() {
                   <button
                     type="button"
                     onClick={() => setIsGifSearchOpen((current) => !current)}
+                    disabled={isActiveMemberBlocked}
                     className="chat-mini-tool"
                   >
                     GIF
@@ -411,6 +506,7 @@ export default function MessagesPage() {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
+                    disabled={isActiveMemberBlocked}
                     className="chat-mini-tool"
                   >
                     Pic
@@ -418,14 +514,18 @@ export default function MessagesPage() {
                   <input
                     type="text"
                     value={draftMessage}
-                    disabled={isSending || !activeThread}
+                    disabled={isSending || !activeThread || isActiveMemberBlocked}
                     onChange={(event) => setDraftMessage(event.target.value)}
-                    placeholder="Write a private message..."
+                    placeholder={
+                      isActiveMemberBlocked
+                        ? "You blocked this member."
+                        : "Write a private message..."
+                    }
                     className="min-w-0 flex-1 rounded-[4px] border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-blue-400/45"
                   />
                   <button
                     type="submit"
-                    disabled={isSending || !activeThread}
+                    disabled={isSending || !activeThread || isActiveMemberBlocked}
                     className="rounded-[4px] border border-blue-400/45 bg-blue-500/15 px-3 py-2 text-xs font-black text-blue-100 disabled:opacity-60"
                   >
                     Send
@@ -458,7 +558,12 @@ function MessageBubble({ message }: { message: ChannelMessage }) {
       />
       <div>
         <p>
-          <span className="font-black text-blue-300">@{message.authorName}</span>{" "}
+          <Link
+            href={`/profile/${message.authorUsername}`}
+            className="font-black text-blue-300 hover:text-white"
+          >
+            @{message.authorName}
+          </Link>{" "}
           {message.body}
         </p>
         {message.attachment && (

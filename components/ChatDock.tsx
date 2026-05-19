@@ -52,9 +52,14 @@ export default function ChatDock() {
   const [messagesByChannel, setMessagesByChannel] = useState<
     Record<string, ChannelMessage[]>
   >(() => getSeedDiscussionMessages());
+  const [unreadByChannel, setUnreadByChannel] = useState<Record<string, number>>(
+    {}
+  );
   const dockRef = useRef<HTMLElement | null>(null);
   const feedRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const isOpenRef = useRef(isOpen);
+  const activeChannelIdRef = useRef(activeChannelId);
   const permissions = currentProfile
     ? getProfilePermissions(currentProfile)
     : loggedOutPermissions;
@@ -63,6 +68,18 @@ export default function ChatDock() {
   const activeMessages = activeChannel
     ? messagesByChannel[activeChannel.id] ?? []
     : [];
+  const totalUnread = Object.values(unreadByChannel).reduce(
+    (total, count) => total + count,
+    0
+  );
+
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
+
+  useEffect(() => {
+    activeChannelIdRef.current = activeChannelId;
+  }, [activeChannelId]);
 
   useEffect(() => {
     let isMounted = true;
@@ -109,10 +126,46 @@ export default function ChatDock() {
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "discussion_messages" },
           async () => {
+            const channelIds = channels.map((room) => room.id);
             const loadedMessages = await getDiscussionMessages(
-              channels.map((room) => room.id)
+              channelIds
             );
-            setMessagesByChannel(loadedMessages);
+            setMessagesByChannel((current) => {
+              const unreadIncrements = channelIds.reduce<Record<string, number>>(
+                (increments, channelId) => {
+                  const nextLength = loadedMessages[channelId]?.length ?? 0;
+                  const currentLength = current[channelId]?.length ?? 0;
+                  const addedCount = Math.max(0, nextLength - currentLength);
+                  const isReadingChannel =
+                    isOpenRef.current &&
+                    activeChannelIdRef.current === channelId;
+
+                  if (addedCount > 0 && !isReadingChannel) {
+                    increments[channelId] = addedCount;
+                  }
+
+                  return increments;
+                },
+                {}
+              );
+
+              if (Object.keys(unreadIncrements).length > 0) {
+                setUnreadByChannel((currentUnread) => {
+                  const nextUnread = { ...currentUnread };
+
+                  Object.entries(unreadIncrements).forEach(
+                    ([channelId, count]) => {
+                      nextUnread[channelId] =
+                        (nextUnread[channelId] ?? 0) + count;
+                    }
+                  );
+
+                  return nextUnread;
+                });
+              }
+
+              return loadedMessages;
+            });
           }
         )
         .subscribe();
@@ -135,6 +188,15 @@ export default function ChatDock() {
       behavior: "smooth",
     });
   }, [activeMessages.length, activeChannelId, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    setUnreadByChannel((current) => ({
+      ...current,
+      [activeChannelId]: 0,
+    }));
+  }, [activeChannelId, isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -171,6 +233,10 @@ export default function ChatDock() {
       setMessagesByChannel((current) => ({
         ...current,
         [activeChannel.id]: [...(current[activeChannel.id] ?? []), newMessage],
+      }));
+      setUnreadByChannel((current) => ({
+        ...current,
+        [activeChannel.id]: 0,
       }));
       setDraftMessage("");
       setIsGifSearchOpen(false);
@@ -219,9 +285,18 @@ export default function ChatDock() {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 left-4 z-50 rounded-full border border-blue-400/35 bg-[#050811] px-4 py-3 text-sm font-black text-blue-100 shadow-[0_18px_45px_rgba(0,0,0,0.4)] transition hover:border-blue-200"
+        className={`fixed bottom-4 left-4 z-50 inline-flex items-center gap-2 rounded-full border px-4 py-3 text-sm font-black text-blue-100 shadow-[0_18px_45px_rgba(0,0,0,0.4)] transition hover:border-blue-200 ${
+          totalUnread > 0
+            ? "border-blue-200 bg-blue-500/25 shadow-[0_0_28px_rgba(59,130,246,0.55)]"
+            : "border-blue-400/35 bg-[#050811]"
+        }`}
       >
-        Chat
+        <span>Chat</span>
+        {totalUnread > 0 && (
+          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-black text-blue-700">
+            {formatUnreadCount(totalUnread)}
+          </span>
+        )}
       </button>
     );
   }
@@ -229,23 +304,34 @@ export default function ChatDock() {
   return (
     <section
       ref={dockRef}
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-blue-400/25 bg-[#050811] text-white shadow-[0_-18px_45px_rgba(0,0,0,0.45)]"
+      className="fixed bottom-3 left-3 right-3 z-50 flex max-h-[78vh] flex-col overflow-hidden rounded-[8px] border border-blue-400/25 bg-[#050811]/95 text-white shadow-[0_20px_55px_rgba(0,0,0,0.55)] backdrop-blur-xl md:bottom-4 md:left-4 md:right-auto md:top-24 md:h-auto md:max-h-none md:w-[340px]"
     >
-      <div className="mx-auto max-w-7xl">
+      <div className="flex min-h-0 flex-1 flex-col">
         <header className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 px-3 py-2">
           <div className="flex flex-wrap gap-1">
             {channels.map((channel) => (
               <button
                 key={channel.id}
                 type="button"
-                onClick={() => setActiveChannelId(channel.id)}
-                className={`rounded-[4px] border px-3 py-1 text-xs font-black transition ${
+                onClick={() => {
+                  setActiveChannelId(channel.id);
+                  setUnreadByChannel((current) => ({
+                    ...current,
+                    [channel.id]: 0,
+                  }));
+                }}
+                className={`inline-flex items-center gap-1 rounded-[4px] border px-3 py-1 text-xs font-black transition ${
                   activeChannelId === channel.id
                     ? "border-blue-300/60 bg-blue-500/20 text-blue-50"
                     : "border-white/10 bg-white/[0.04] text-zinc-300 hover:border-blue-400/35"
                 }`}
               >
-                {channel.name}
+                <span>{channel.name}</span>
+                {(unreadByChannel[channel.id] ?? 0) > 0 && (
+                  <span className="rounded-full bg-blue-50 px-1.5 py-0.5 text-[10px] font-black text-blue-700">
+                    {formatUnreadCount(unreadByChannel[channel.id])}
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -262,7 +348,7 @@ export default function ChatDock() {
 
         <div
           ref={feedRef}
-          className="max-h-64 min-h-36 overflow-y-auto px-3 py-2"
+          className="min-h-36 flex-1 overflow-y-auto px-3 py-2"
         >
           {activeMessages.length > 0 ? (
             activeMessages.map((message) => (
@@ -294,7 +380,7 @@ export default function ChatDock() {
               </button>
             </div>
             {gifResults.length > 0 && (
-              <div className="mt-2 grid max-h-40 grid-cols-4 gap-2 overflow-y-auto sm:grid-cols-6 md:grid-cols-8">
+              <div className="mt-2 grid max-h-40 grid-cols-3 gap-2 overflow-y-auto sm:grid-cols-4">
                 {gifResults.map((gif) => (
                   <button
                     key={gif.id}
@@ -320,7 +406,7 @@ export default function ChatDock() {
         <footer className="border-t border-white/10 px-3 py-2">
           {permissions.canComment ? (
             <form
-              className="flex items-center gap-2"
+              className="grid grid-cols-[auto_auto_1fr_auto] items-center gap-2"
               onSubmit={(event) => {
                 event.preventDefault();
                 handleSubmitMessage();
@@ -383,7 +469,7 @@ export default function ChatDock() {
 
 function ChatDockMessage({ message }: { message: ChannelMessage }) {
   return (
-    <article className="grid grid-cols-[28px_1fr_auto] gap-2 py-1 text-sm">
+    <article className="grid grid-cols-[28px_1fr] gap-2 py-1 text-sm">
       <Image
         src={message.authorAvatarUrl || "/images/profile-avatar.svg"}
         alt={`${message.authorName} avatar`}
@@ -415,11 +501,15 @@ function ChatDockMessage({ message }: { message: ChannelMessage }) {
           </div>
         )}
       </div>
-      <span className="self-start rounded-[4px] bg-blue-50 px-1.5 py-1 text-[10px] font-bold text-blue-700">
+      <span className="col-start-2 w-fit rounded-[4px] bg-blue-50 px-1.5 py-1 text-[10px] font-bold text-blue-700">
         {message.createdAt}
       </span>
     </article>
   );
+}
+
+function formatUnreadCount(count: number) {
+  return count > 99 ? "99+" : String(count);
 }
 
 function getDiscussionChannels(rooms?: EditableChatRoom[]): DiscussionChannel[] {
