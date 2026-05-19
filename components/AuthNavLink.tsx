@@ -8,6 +8,7 @@ import { getSupabaseClient } from "../lib/supabase";
 export default function AuthNavLink() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [canUseSiteEditor, setCanUseSiteEditor] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -61,6 +62,19 @@ export default function AuthNavLink() {
     };
   }, []);
 
+  async function handleLogout() {
+    try {
+      setIsSigningOut(true);
+      const supabase = getSupabaseClient();
+      await supabase.auth.signOut();
+      setIsLoggedIn(false);
+      setCanUseSiteEditor(false);
+      window.location.href = "/login";
+    } catch {
+      setIsSigningOut(false);
+    }
+  }
+
   if (isLoggedIn) {
     return (
       <>
@@ -77,6 +91,14 @@ export default function AuthNavLink() {
         >
           <GearIcon />
         </Link>
+        <button
+          type="button"
+          onClick={handleLogout}
+          disabled={isSigningOut}
+          className="hub-nav-link disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isSigningOut ? "Logging out..." : "Logout"}
+        </button>
       </>
     );
   }

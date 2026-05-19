@@ -52,6 +52,7 @@ export default function ChatDock() {
   const [messagesByChannel, setMessagesByChannel] = useState<
     Record<string, ChannelMessage[]>
   >(() => getSeedDiscussionMessages());
+  const dockRef = useRef<HTMLElement | null>(null);
   const feedRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const permissions = currentProfile
@@ -135,6 +136,22 @@ export default function ChatDock() {
     });
   }, [activeMessages.length, activeChannelId, isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    function handlePointerDown(event: PointerEvent) {
+      if (!dockRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [isOpen]);
+
   async function handleSubmitMessage(attachment?: ChannelMessage["attachment"]) {
     if (!currentProfile || isSending || !activeChannel) return;
 
@@ -210,7 +227,10 @@ export default function ChatDock() {
   }
 
   return (
-    <section className="fixed bottom-0 left-0 right-0 z-50 border-t border-blue-400/25 bg-[#050811] text-white shadow-[0_-18px_45px_rgba(0,0,0,0.45)]">
+    <section
+      ref={dockRef}
+      className="fixed bottom-0 left-0 right-0 z-50 border-t border-blue-400/25 bg-[#050811] text-white shadow-[0_-18px_45px_rgba(0,0,0,0.45)]"
+    >
       <div className="mx-auto max-w-7xl">
         <header className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 px-3 py-2">
           <div className="flex flex-wrap gap-1">

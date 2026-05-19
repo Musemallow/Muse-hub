@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import AuthNavLink from "../../components/AuthNavLink";
 import FeedPostCard from "../../components/FeedPostCard";
-import { landingUpdates } from "../../data/landingContent";
 import { discussionCategories } from "../../data/discussionThreads";
 import { getLatestPosts } from "../../lib/posts";
 import { getSiteContent } from "../../lib/siteContent";
@@ -20,7 +19,7 @@ export default async function HubPage() {
 
   return (
     <main className="landing-page min-h-screen bg-[#020309] text-white">
-      <section className="landing-hero relative flex min-h-[92vh] items-end overflow-hidden px-4 pb-10 pt-44 sm:px-6 sm:pt-36 lg:px-8 lg:pt-36">
+      <section className="landing-hero relative flex min-h-[92vh] items-center overflow-hidden px-4 pb-16 pt-44 text-center sm:px-6 sm:pt-36 lg:px-8 lg:pt-36">
         <Image
           src={siteContent.hero.bannerUrl}
           alt="MuseMallow forest banner"
@@ -60,8 +59,8 @@ export default async function HubPage() {
           </div>
         </nav>
 
-        <div className="relative z-10 mx-auto w-full max-w-7xl">
-          <div className="max-w-3xl">
+        <div className="relative z-10 mx-auto flex w-full max-w-7xl justify-center">
+          <div className="mx-auto max-w-3xl">
             <Image
               src="/Logo.png"
               alt="Musemallow Logo"
@@ -74,14 +73,14 @@ export default async function HubPage() {
             <p className="text-sm uppercase tracking-[0.3em] text-blue-200/80">
               {siteContent.hero.eyebrow}
             </p>
-            <h1 className="mt-3 max-w-3xl text-4xl font-black leading-tight text-white sm:text-6xl lg:text-7xl">
+            <h1 className="mx-auto mt-3 max-w-3xl text-4xl font-black leading-tight text-white sm:text-6xl lg:text-7xl">
               {siteContent.hero.title}
             </h1>
-            <p className="mt-5 max-w-2xl text-base leading-8 text-zinc-200 sm:text-lg">
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-zinc-200 sm:text-lg">
               {siteContent.hero.body}
             </p>
 
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap">
               <Link
                 href="#latest-posts"
                 className="inline-flex justify-center rounded-full border border-blue-400/60 bg-blue-500/15 px-5 py-3 text-sm font-semibold text-blue-100 shadow-[0_0_22px_rgba(37,99,235,0.22)] transition hover:border-blue-200 hover:bg-blue-500/25"
@@ -118,28 +117,9 @@ export default async function HubPage() {
                   <FeedPostCard key={post.id} post={post} compact />
                 ))
               ) : (
-                landingUpdates.slice(0, 3).map((post) => (
-                  <Link
-                    key={post.id}
-                    href={post.href}
-                    className="rounded-[8px] border border-blue-400/15 bg-[#050811]/90 p-5 shadow-[0_18px_38px_rgba(0,0,0,0.22)] transition hover:border-blue-400/40 hover:bg-[#07101d]"
-                  >
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span className="rounded-full border border-blue-400/35 bg-blue-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-blue-100">
-                        {post.label}
-                      </span>
-                      <span className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-                        {post.date}
-                      </span>
-                    </div>
-                    <h3 className="mt-4 text-xl font-bold text-white">
-                      {post.title}
-                    </h3>
-                    <p className="mt-2 max-w-3xl text-sm leading-7 text-zinc-400">
-                      {post.summary}
-                    </p>
-                  </Link>
-                ))
+                <div className="rounded-[8px] border border-blue-400/15 bg-[#050811]/90 p-5 text-sm leading-7 text-zinc-400 shadow-[0_18px_38px_rgba(0,0,0,0.22)]">
+                  No posts published yet.
+                </div>
               )}
             </div>
           </section>
