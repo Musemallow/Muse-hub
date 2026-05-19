@@ -17,6 +17,7 @@ export type DirectMessageThread = {
   id: string;
   member: DirectMessageMember;
   unread: number;
+  lastMessageAt: string;
   messages: ChannelMessage[];
 };
 
@@ -172,6 +173,7 @@ function rowsToThreads(profile: Profile, rows: DirectMessageRow[]) {
 
     if (existing) {
       existing.messages.push(mapDirectMessageRow(row));
+      existing.lastMessageAt = row.created_at;
       return;
     }
 
@@ -179,14 +181,13 @@ function rowsToThreads(profile: Profile, rows: DirectMessageRow[]) {
       id: `dm-${member.username}`,
       member,
       unread: 0,
+      lastMessageAt: row.created_at,
       messages: [mapDirectMessageRow(row)],
     });
   });
 
   return Array.from(threadsByMember.values()).sort((a, b) => {
-    const aLast = a.messages.at(-1)?.id ?? "";
-    const bLast = b.messages.at(-1)?.id ?? "";
-    return bLast.localeCompare(aLast);
+    return b.lastMessageAt.localeCompare(a.lastMessageAt);
   });
 }
 

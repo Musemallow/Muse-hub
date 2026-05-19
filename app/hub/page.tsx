@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import AuthNavLink from "../../components/AuthNavLink";
 import FeedPostCard from "../../components/FeedPostCard";
-import HubMemberStats from "../../components/HubMemberStats";
 import { landingUpdates } from "../../data/landingContent";
 import { discussionCategories } from "../../data/discussionThreads";
 import { getLatestPosts } from "../../lib/posts";
@@ -61,7 +60,7 @@ export default async function HubPage() {
           </div>
         </nav>
 
-        <div className="relative z-10 mx-auto grid w-full max-w-7xl gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-end">
+        <div className="relative z-10 mx-auto w-full max-w-7xl">
           <div className="max-w-3xl">
             <Image
               src="/Logo.png"
@@ -103,8 +102,6 @@ export default async function HubPage() {
               </Link>
             </div>
           </div>
-
-          <HubMemberStats nextEventValue={getNextEventValue(siteContent)} />
         </div>
       </section>
 
@@ -275,13 +272,6 @@ async function getHubPosts() {
   } catch {
     return [];
   }
-}
-
-function getNextEventValue(siteContent: Awaited<ReturnType<typeof getSiteContent>>) {
-  const nextEvent = siteContent.events[0];
-  if (!nextEvent) return "TBD";
-
-  return `${nextEvent.date} / ${nextEvent.time}`;
 }
 
 function SectionHeading({ eyebrow, title }: { eyebrow: string; title: string }) {

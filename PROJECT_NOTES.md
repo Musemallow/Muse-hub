@@ -72,6 +72,32 @@ MuseHub is MuseMallow's creator-centric community platform. It is a personal cre
 10. Mobile/PWA polish
 11. Security pass
 
+## Active Roadmap
+
+### Now
+
+- Finish Supabase setup for `discussion_messages`, `direct_messages`, `notifications`, `site_content`, and storage buckets.
+- Verify Realtime is enabled in the Supabase dashboard and both chat tables are listed under the `supabase_realtime` publication.
+- Test bottom chat with two signed-in members in separate browsers.
+- Test `/messages` DMs by sending member-to-member text and image attachments.
+- Add the Tenor key to `.env.local` so GIF search works in chat and DMs.
+
+### Next
+
+- Add clearer chat connection/loading/error states so failed Supabase or Realtime setup is obvious in the UI.
+- Add unread DM counts and notification badges for new private messages.
+- Add member search/start-DM polish, including empty states and recent conversation ordering.
+- Add moderation controls for hiding chat messages and DMs.
+- Add owner/admin tools for managing rooms without needing direct SQL.
+
+### Later
+
+- Add typing indicators and online presence.
+- Add push notifications for DMs, mentions, and owner posts.
+- Add message reporting/blocking tools.
+- Add PWA/mobile app polish.
+- Add rate limits and a final RLS/security audit before public launch.
+
 ## Security Pass Requirements
 
 - Auth validation

@@ -129,5 +129,5 @@ begin
     );
   end if;
 exception
-  when insufficient_privilege or undefined_schema or undefined_table then null;
+  when insufficient_privilege or invalid_schema_name or undefined_table then null;
 end $$;

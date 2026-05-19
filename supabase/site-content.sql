@@ -61,7 +61,7 @@ create policy "Owner can update site content"
 insert into public.site_content (id, content)
 values (
   'main',
-  '{
+  $musehub_content${
     "hero": {
       "bannerUrl": "/images/musemallow-banner.jpeg",
       "eyebrow": "Welcome to The Forest",
@@ -156,13 +156,13 @@ values (
         "description": "Share feedback, report issues, and suggest improvements for MuseHub."
       }
     ]
-  }'::jsonb
+  }$musehub_content$::jsonb
 )
 on conflict (id) do nothing;
 
 update public.site_content
 set
-  content = content || '{
+  content = content || $musehub_chat_rooms${
     "chatRooms": [
       {
         "id": "general-chat",
@@ -180,7 +180,7 @@ set
         "description": "Share feedback, report issues, and suggest improvements for MuseHub."
       }
     ]
-  }'::jsonb,
+  }$musehub_chat_rooms$::jsonb,
   updated_at = now()
 where id = 'main'
   and not (content ? 'chatRooms');

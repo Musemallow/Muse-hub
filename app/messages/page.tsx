@@ -114,6 +114,7 @@ export default function MessagesPage() {
           async () => {
             const loadedThreads = await getDirectMessageThreads(currentProfile);
             setThreads((current) => mergeThreads(current, loadedThreads));
+            setActiveThreadId((current) => current || loadedThreads[0]?.id || "");
           }
         )
         .subscribe();
@@ -168,10 +169,15 @@ export default function MessagesPage() {
       setThreads((current) =>
         current.map((thread) =>
           thread.id === activeThread.id
-            ? { ...thread, messages: [...thread.messages, message] }
+            ? {
+                ...thread,
+                lastMessageAt: new Date().toISOString(),
+                messages: [...thread.messages, message],
+              }
             : thread
         )
       );
+      setThreads((current) => sortThreadsByActivity(current));
       setDraftMessage("");
       setIsGifSearchOpen(false);
     } catch (error) {
@@ -248,6 +254,48 @@ export default function MessagesPage() {
             />
 
             <div className="mt-4 grid gap-1">
+              {threads.length > 0 && (
+                <div className="mb-3 border-b border-white/10 pb-3">
+                  <p className="mb-2 text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">
+                    Recent DMs
+                  </p>
+                  <div className="grid gap-1">
+                    {threads.map((thread) => (
+                      <button
+                        key={thread.id}
+                        type="button"
+                        onClick={() => setActiveThreadId(thread.id)}
+                        className={`grid grid-cols-[28px_1fr_auto] items-center gap-2 rounded-[4px] px-2 py-2 text-left text-sm transition ${
+                          activeThread?.id === thread.id
+                            ? "bg-blue-500/15 text-white"
+                            : "text-zinc-300 hover:bg-blue-500/10 hover:text-white"
+                        }`}
+                      >
+                        <Image
+                          src={thread.member.avatarUrl}
+                          alt={`${thread.member.name} avatar`}
+                          width={28}
+                          height={28}
+                          unoptimized
+                          className="h-7 w-7 rounded-[4px] border border-blue-400/25 object-cover"
+                        />
+                        <span className="min-w-0">
+                          <span className="block truncate font-bold">
+                            {thread.member.name}
+                          </span>
+                          <span className="block truncate text-xs text-zinc-500">
+                            {getThreadPreview(thread)}
+                          </span>
+                        </span>
+                        <span className="text-[10px] font-bold uppercase text-zinc-600">
+                          {formatThreadTime(thread.lastMessageAt)}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {filteredProfiles.map((profile) => (
                 <button
                   key={profile.id}
@@ -444,6 +492,7 @@ function ensureThread(
       id: `dm-${member.username}`,
       member,
       unread: 0,
+      lastMessageAt: "",
       messages: [],
     },
     ...threads,
@@ -464,5 +513,30 @@ function mergeThreads(
     threadsByMember.set(thread.member.id, thread);
   });
 
-  return Array.from(threadsByMember.values());
+  return sortThreadsByActivity(Array.from(threadsByMember.values()));
+}
+
+function sortThreadsByActivity(threads: DirectMessageThread[]) {
+  return [...threads].sort((a, b) => b.lastMessageAt.localeCompare(a.lastMessageAt));
+}
+
+function getThreadPreview(thread: DirectMessageThread) {
+  const lastMessage = thread.messages.at(-1);
+  if (!lastMessage) return "No messages yet.";
+  if (lastMessage.attachment && !lastMessage.body) {
+    return lastMessage.attachment.label;
+  }
+  return lastMessage.body;
+}
+
+function formatThreadTime(value: string) {
+  if (!value) return "";
+
+  const createdAt = new Date(value);
+  if (Number.isNaN(createdAt.getTime())) return "";
+
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+  }).format(createdAt);
 }
